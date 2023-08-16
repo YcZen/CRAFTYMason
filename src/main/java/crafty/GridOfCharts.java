@@ -4,14 +4,19 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import net.sourceforge.jFuzzyLogic.fcl.FclParser.declaration_return;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.PreparedStatement;
+import java.util.HashMap;
 
 
 public class GridOfCharts implements ModelState,Steppable {
@@ -20,41 +25,74 @@ public class GridOfCharts implements ModelState,Steppable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private XYSeries series;
-    private int timeElapsed = 0;
     ModelRunner modelRunner;
     public JFrame frame;
-
+    private HashMap<String, XYSeries> totalProductionSeries = new HashMap<String, XYSeries>();
+    private HashMap<String, XYSeries> totalDemandSeries = new HashMap<String, XYSeries>();
+    private HashMap<String, Double> productionHashMap;
+	private HashMap<String, Double> demandHashMap;
+	private boolean isInilized = false;
+    
     public GridOfCharts() {
-    	series = new XYSeries("Random Data");
-        frame = new JFrame("Grid of Charts");
+    	
+        frame = new JFrame("Ecoservices");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new GridLayout(2, 2));
 
-        for (int i = 0; i < 4; i++) {
-            JFreeChart chart;
-            if (i == 0) {  // Just updating the first chart for demonstration
-                XYSeriesCollection dataset = new XYSeriesCollection(series);
-                chart = ChartFactory.createXYLineChart(
-                        "Dynamic Chart", "Time", "Value", dataset
-                );
-            } else {
-                chart = ChartFactory.createXYLineChart(
-                        "Chart " + (i + 1), "X", "Y", null
-                );
-            }
-            XYPlot plot = chart.getXYPlot();
-            frame.add(new ChartPanel(chart));
-        }
+       
+    }
+    
+    public void prepare() {
+    	productionHashMap = modelRunner.getState(DataLoader.class).getGlobalProductionMap();
+    	demandHashMap = modelRunner.getState(DataLoader.class).getAnualDemand();
+    
 
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+         for (String productName : productionHashMap.keySet()) {
+        	 
+        	 XYSeriesCollection dataset = new XYSeriesCollection();
+             JFreeChart chart;
+             
+             XYSeries supplySeries = new XYSeries(productName + " Supply");
+             XYSeries demandSeries = new XYSeries(productName + " Demand");
+             
+             totalProductionSeries.put(productName, supplySeries);
+             totalDemandSeries.put(productName,demandSeries);
+             
+                 dataset.addSeries(supplySeries);
+                 dataset.addSeries(demandSeries);
+                
+                 chart = ChartFactory.createXYLineChart(
+                		 productName, "Time", "Quantity", dataset);
+                 
+              // Set chart and plot background to white
+                 chart.setBackgroundPaint(Color.WHITE);
+                 XYPlot plot = (XYPlot) chart.getPlot();
+                 plot.setBackgroundPaint(Color.WHITE);
+
+                 // Make lines thicker
+                 XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
+                 BasicStroke thickStroke = new BasicStroke(2.0f);
+                 renderer.setStroke(thickStroke);
+
+             frame.add(new ChartPanel(chart));
+         }
+         
+     
+			int dataSize = modelRunner.getState(DataLoader.class).getGlobalProductionMap().size();
+			int gridWidth = (int) Math.ceil(Math.sqrt(dataSize));
+			frame.setLayout(new GridLayout(gridWidth, gridWidth));
+			frame.pack();
+			frame.setLocationRelativeTo(null);
+			frame.setVisible(true);
+	       
+         
+
     }
 
     private void updateChart() {
-        timeElapsed++;
-        series.add(timeElapsed, Math.random() * 100);
+        modelRunner.getState(DataLoader.class).getServiceNameList().forEach(productionName -> {
+        	totalProductionSeries.get(productionName).add(modelRunner.schedule.getSteps(), productionHashMap.get(productionName));
+        	totalDemandSeries.get(productionName).add(modelRunner.schedule.getSteps(),demandHashMap.get(productionName));
+        });
     }
 
 	@Override
@@ -66,8 +104,9 @@ public class GridOfCharts implements ModelState,Steppable {
 	@Override
 	public void setup(ModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
-		timeElapsed=0;
-		series.clear();
+		totalProductionSeries.clear();
+		totalDemandSeries.clear();
+		prepare();
 		
 		
 		

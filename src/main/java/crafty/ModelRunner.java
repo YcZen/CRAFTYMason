@@ -23,16 +23,17 @@ public class ModelRunner extends SimState{
 	private List<ModelState> stateManager = new ArrayList<>();
 	public int totalTicks = 70;
 	private int mapWidth;
+	private double threshold = 0.3;
 	
 	
-	public double getCropSupply(){
-		//System.out.println(this.getState(DataLoader.class).getUtitlityMap());
-		Double returnedValue = this.getState(DataLoader.class).getGlobalProductionMap().get("Crops");
-		if(returnedValue != null) {
-			return returnedValue; 
-		}
-		return 0.;
-	}
+//	public double getCropSupply(){
+//		//System.out.println(this.getState(DataLoader.class).getUtitlityMap());
+//		Double returnedValue = this.getState(DataLoader.class).getGlobalProductionMap().get("Crops");
+//		if(returnedValue != null) {
+//			return returnedValue; 
+//		}
+//		return 0.;
+//	}
 //	
 //	public double getCropDemand(){
 //		//System.out.println(this.getState(DataLoader.class).getUtitlityMap());
@@ -47,8 +48,13 @@ public class ModelRunner extends SimState{
 //	public void setRserviceNameFile(String nameString) { serviceNameFile = nameString; }
 //	//public Object domRandomMultiplier() { return new sim.util.Interval(0.0, 100.0); }
 //	
-	public int getMapWidth() { return mapWidth; }
-	public void setMapWidth(int val) { if (val > 0) mapWidth = val; }
+	
+	public void setThreshold(double thres) {threshold = thres;}
+	public double getThreshold() {return threshold;}
+	public Object domThreshold() {return new sim.util.Interval(0.0, 1.0);}
+	
+//	public int getMapWidth() { return mapWidth; }
+//	public void setMapWidth(int val) { if (val > 0) mapWidth = val; }
 	
 	public DataLoader getDataLoader() {
 		return this.getState(DataLoader.class);
@@ -118,4 +124,5 @@ public class ModelRunner extends SimState{
 		doLoop(ModelRunner.class, args);
 		System.exit(0);
 	}
+
 }

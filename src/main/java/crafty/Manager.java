@@ -191,7 +191,7 @@ public class Manager extends AbstractManager {
 																									// from
 																									// one-owner-many-lands
 																									// code
-					if (myCompetitiveness > otherCompetitiveness & new Random().nextDouble() < 0.2) {
+					if (myCompetitiveness > otherCompetitiveness & new Random().nextDouble() < modelRunner.getThreshold()) {
 						// 1.the previous owner remove this cell from its landSet
 						landCell.getOwner().getLandSet().remove(landCell);
 						// 1.5 if the previous owner is not representative and has not land, then remove
