@@ -1,0 +1,382 @@
+package crafty;
+
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import sim.engine.SimState;
+import sim.engine.Steppable;
+import tech.tablesaw.api.Row;
+import tech.tablesaw.api.Table;
+
+// This class is not abtract enough. It should be made more abstract later.
+public class DataLoader implements ModelState, Steppable{
+
+	private HashMap<String, Manager> agentTypeMap = new HashMap<>();
+	private CellSet cellSet = new CellSet();
+	private ManagerSet managerSet = new ManagerSet();
+	// private TechnologySet technologySet = new TechnologySet();
+	String serviceNameFile;
+	String capitalNameFile;
+	private List<String> capitalNameList;
+	private List<String> serviceNameList;
+//	private List<String> capitalNameList2;
+//	private List<String> serviceNameList2;
+	// serviceNameIndexMap is for inquiry rows in a Table. rows can only be accessed
+	// using integer indeces.
+	private Map<String, Integer> serviceNameIndexMap = new HashMap<>();
+//	private Map<String, Integer> serviceNameIndexMap2 = new HashMap<>();
+//	private Table initialServiceTable = Table.create();
+	private HashMap<String, Double> initialZeroProdutionMap = new HashMap<>();
+	private Iterator<File> anualCapitalFileIterator;
+	private HashMap<String, Double> anualDemandMap = new HashMap<>();
+	private Table anualDemandTable;
+	private Iterator<Row> anualDemandIterator;
+	private HashMap<String, Double> globalProductionMap = new HashMap<>();
+	private HashMap<String, Double> utitlityMap = new HashMap<>();
+	HashMap<String, List<Double>> strategy = null;
+	HashMap<String, Double> currentStrategy = new HashMap<>();
+	ModelRunner modelRunner;
+	private int mapWidth = 0;
+	private int mapHeight = 0;
+	private Map<String, Double> initSupplyMap = new HashMap<>();
+	int time = 0;
+
+	private String agentDataDirectory, cellDataPath, anualCapitalFilePath, anualDemandFile;
+
+	public DataLoader(String agentDataDirectory, String cellDataPath) {
+		this.agentDataDirectory = agentDataDirectory;
+		this.cellDataPath = cellDataPath;
+	}
+
+	public DataLoader(String agentDataDirectory, String cellDataPath, String anualCapitalFilePath) {
+		this(agentDataDirectory, cellDataPath);
+		this.anualCapitalFilePath = anualCapitalFilePath;
+	}
+
+	public DataLoader(String agentDataDirectory, String cellDataPath, String anualCapitalFilePath,
+			String anualDemandFile) {
+		this(agentDataDirectory, cellDataPath, anualCapitalFilePath);
+		this.anualDemandFile = anualDemandFile;
+	}
+
+	public DataLoader(String serviceNameFile, String capitalNameFile, String agentDataDirectory, String cellDataPath,
+			String anualCapitalFilePath, String anualDemandFile) {
+		this(agentDataDirectory, cellDataPath, anualCapitalFilePath);
+		this.anualDemandFile = anualDemandFile;
+		this.serviceNameFile = serviceNameFile;
+		this.capitalNameFile = capitalNameFile;
+	}
+
+	@Override
+	public void setup(ModelRunner modelRunner) {
+		this.modelRunner = modelRunner;
+		prepareSerivceNames(serviceNameFile);
+		prepareCapitalNames(capitalNameFile);
+
+		loadAgentsData(agentDataDirectory);
+		loadBaselineCellData(cellDataPath);
+
+		// prepareDataNames();
+//		prepareInitialServiceTable();
+		initializeHashMaps();
+		refreshGlobalProductionMap();
+		File anualCapitalFileDir = new File(anualCapitalFilePath);
+		this.anualCapitalFileIterator = Arrays.stream(anualCapitalFileDir.listFiles()).iterator();
+		loadAnualDemandDataToIterator(anualDemandFile);
+		
+	}
+
+	@Override
+	public void onStartGo() {
+		updateDemand();
+		// we use updateSupply to calculate the initial supply produced by all managers
+		// in their setup method. Normally, update supply should be calculated after
+		// competitions.
+		if (modelRunner.schedule.getTime() == 0.) {
+			updateSupply();
+			for (HashMap.Entry<String, Double> entry : globalProductionMap.entrySet()) {
+				String key = entry.getKey();
+				Double value = entry.getValue();
+				initSupplyMap.put(key, value);
+			}
+			System.out.println("initial globalProductionMap--" + globalProductionMap);
+
+		}
+		// utility is calculated using last-tick supply and current demand.
+		updateUtility();
+		updateAnualCellCapitals();
+		if (strategy != null) {
+			updateCurrentStrategy((int) modelRunner.schedule.getTime());
+		}
+
+	}
+
+	@Override
+	public void go() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onEndGo() {
+		updateSupply();
+
+	}
+
+	private void prepareSerivceNames(String serviceNameFile) {
+		Table serviceNameTable = Table.read().csv(serviceNameFile);
+		serviceNameList = serviceNameTable.stringColumn("Name").asList();
+		int tableLength = serviceNameTable.rowCount();
+		for (int i = 0; i < tableLength; i++) {
+			String keyString = serviceNameTable.stringColumn("Name").getString(i);
+			int index = serviceNameTable.intColumn("Index").get(i);
+			serviceNameIndexMap.put(keyString, index);
+		}
+	}
+
+	private void prepareCapitalNames(String capitalNameFile) {
+		Table capitalNameTable = Table.read().csv(capitalNameFile);
+		capitalNameList = capitalNameTable.stringColumn("Name").asList();
+	}
+
+	private void loadAgentsData(String agentDataDirectory) {
+		File dir = new File(agentDataDirectory);
+		File[] directoryListing = dir.listFiles();
+		for (File agentFile : directoryListing) {
+			Table agentTable = Table.read().csv(agentFile);
+			agentTable.setName(agentFile.getName().replace(".csv", ""));
+			Manager manager = new Manager();
+			manager.setManagerType(agentTable.name());
+			manager.setSensitivityTable(agentTable);
+			manager.setRepresentative(true);
+			agentTypeMap.put(agentTable.name(), manager);
+			managerSet.add(manager);
+
+			// Convert table into hashmap for improving calculation performance.
+			serviceNameList.forEach(serviceName -> {
+				capitalNameList.forEach(capitalName -> {
+					double sensitivityValue = ((Number) manager.getSensitivityTable().column(capitalName)
+							.get(serviceNameIndexMap.get(serviceName))).doubleValue();
+					double productionValue = ((Number) manager.getSensitivityTable().column("Production")
+							.get(serviceNameIndexMap.get(serviceName))).doubleValue();
+					manager.getSensitivityMap().add(serviceName, capitalName, sensitivityValue);
+					manager.getSensitivityMap().add(serviceName, "Production", productionValue);
+				});
+			});
+		}
+	}
+
+	private void loadBaselineCellData(String cellDataPath) {
+
+		Table table = Table.read().csv(cellDataPath);
+		int rowNumber = table.rowCount();
+		for (int i = 0; i < rowNumber; i++) {
+			LandCell landCell = new LandCell();
+			landCell.setInformationTable(table.row(i));
+
+		//	landCell.initializeCapitalFilter();
+			landCell.initializeProductionFilter(this);
+
+			cellSet.add(landCell);
+			int x = landCell.getInformationTable().getInt("x");
+			int y = landCell.getInformationTable().getInt("y");
+			cellSet.addCellToMap(x, y, landCell);
+			String managerTypeString = table.row(i).getString("FR");
+			// clone and mutate
+			Manager manager = agentTypeMap.get(managerTypeString).clone();
+			manager.mutate(0.0, 0.1);
+			//////////////
+			landCell.setOwner(manager);
+			manager.getLandSet().add(landCell);
+			managerSet.add(manager);
+			mapWidth = Math.max(mapWidth, x);// this variable is for map visualization
+			mapHeight = Math.max(mapHeight, y);// this variable is for map visualization
+
+		}
+	}
+
+	private void loadAnualDemandDataToIterator(String anualDemandFile) {
+		anualDemandTable = Table.read().csv(anualDemandFile);
+		int rowNumber = anualDemandTable.rowCount();
+		Row[] anualDemandList = new Row[rowNumber];
+		for (int i = 0; i < rowNumber; i++) {
+			anualDemandList[i] = anualDemandTable.row(i);
+		}
+		anualDemandIterator = Arrays.stream(anualDemandList).iterator();
+	}
+
+	// use the table information to initalize HashMap. when calculating production,
+	// using table is too slow.
+	private void initializeHashMaps() {
+
+		// initialize landCell HashMaps.
+		cellSet.forEach(landCell -> {
+			capitalNameList.forEach(capitalName -> {
+				double capitalValue = ((Number) landCell.getInformationTable().getDouble(capitalName)).doubleValue();
+				landCell.getCapitalHashMap().put(capitalName, capitalValue);
+			});
+		});
+
+		serviceNameList.forEach(serviceName -> {
+			initialZeroProdutionMap.put(serviceName, 0.);
+		});
+
+		// Initialize default strategy. All dimensions are 1 by default.
+		serviceNameList.forEach(serviceName -> {
+			currentStrategy.put(serviceName, 1.0);
+		});
+	}
+
+
+	private void refreshGlobalProductionMap() {
+		serviceNameList.forEach(serviceName -> {
+			globalProductionMap.put(serviceName, 0.);
+		});
+	}
+
+	public void updateAnualCellCapitals() {
+		if (anualCapitalFileIterator.hasNext()) {
+			File anualCapitalFile = anualCapitalFileIterator.next();
+			Table anualCapitalTable = Table.read().csv(anualCapitalFile);
+			int rowNumber = anualCapitalTable.rowCount();
+			for (int i = 0; i < rowNumber; i++) {
+				Row cellInformationTable = anualCapitalTable.row(i);
+				int x = cellInformationTable.getInt("x");// not case-sensitive
+				int y = cellInformationTable.getInt("y");
+				cellSet.getCell(x, y).setInformationTable(cellInformationTable);
+			}
+
+			// update landCell HashMaps.
+			cellSet.forEach(landCell -> {
+				capitalNameList.forEach(capitalName -> {
+					double capitalValue = ((Number) landCell.getInformationTable().getDouble(capitalName))
+							.doubleValue();
+					landCell.getCapitalHashMap().put(capitalName, capitalValue);
+				});
+			});
+		}
+	}
+
+	public void updateDemand() {
+		if (anualDemandIterator.hasNext()) {
+			Row nextDemandRow = anualDemandIterator.next();
+			serviceNameList.forEach(serviceName -> {
+				double demandValue = ((Number) nextDemandRow.getObject(serviceName)).doubleValue();
+				anualDemandMap.put(serviceName, demandValue);
+			});
+		}
+	}
+
+	public void updateSupply() {
+		refreshGlobalProductionMap();
+		for (AbstractManager manager : managerSet) {
+			serviceNameList.forEach(serviceName -> {
+				globalProductionMap.put(serviceName, globalProductionMap.get(serviceName)
+						+ ((Manager) manager).getServiceProductionMap().get(serviceName));
+			});
+		}
+	}
+
+	public void updateUtility() {
+		serviceNameList.forEach(serviceName -> {
+			utitlityMap.put(serviceName, (anualDemandMap.get(serviceName) - globalProductionMap.get(serviceName)));
+					/// globalProductionMap.get(serviceName));
+		});
+	}
+
+	public void updateCurrentStrategy(int ticks) {
+		serviceNameList.forEach(serviceName -> {
+			currentStrategy.put(serviceName, strategy.get(serviceName).get(ticks));
+		});
+	}
+
+	public Map<String, Integer> getServiceNameIndexMap() {
+		return serviceNameIndexMap;
+	}
+
+	public HashMap<String, Manager> getAgentTypeMap() {
+		return agentTypeMap;
+	}
+
+	public CellSet getCellSet() {
+		return cellSet;
+	}
+
+	public ManagerSet getManagerSet() {
+		return managerSet;
+	}
+
+	public List<String> getCapitalNameList() {
+		return capitalNameList;
+	}
+
+	public List<String> getServiceNameList() {
+		return serviceNameList;
+	}
+
+//	public Table getInitialServiceTable() {
+//		return initialServiceTable.copy();
+//	}
+
+	public HashMap<String, Double> getInitialZeroProductionMap() {
+		return initialZeroProdutionMap;
+	}
+
+	public HashMap<String, Double> getAnualDemand() {
+		return anualDemandMap;
+	}
+
+	public HashMap<String, Double> getGlobalProductionMap() {
+		return globalProductionMap;
+	}
+
+	public void setGlobalProductionMap(HashMap<String, Double> globalProductionMap) {
+		this.globalProductionMap = globalProductionMap;
+	}
+
+	public HashMap<String, Double> getUtitlityMap() {
+		return utitlityMap;
+	}
+
+	public void setStrategy(HashMap<String, List<Double>> strategy) {
+		this.strategy = strategy;
+	}
+
+	public HashMap<String, Double> getCurrentStrategy() {
+		return currentStrategy;
+	}
+
+	public int getMapWidth() {
+		return mapWidth;
+	}
+
+	public int getMapHeight() {
+		return mapHeight;
+	}
+
+	public Map<String, Double> getInitSupplyMap() {
+		return initSupplyMap;
+	}
+	public int getTime() {
+		return time;
+	}
+
+	@Override
+	public void step(SimState state) {
+		onStartGo();
+		time++;
+		//System.out.println(anualDemandMap);
+	}
+
+	@Override
+	public void toSchedule() {
+		modelRunner.schedule.scheduleRepeating(0, modelRunner.indexOf(this) , this, 1.0);
+		
+	}
+
+}

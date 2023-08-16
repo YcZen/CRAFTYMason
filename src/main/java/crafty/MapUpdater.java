@@ -1,0 +1,65 @@
+package crafty;
+
+import java.util.HashMap;
+import java.util.Set;
+
+import sim.engine.SimState;
+import sim.engine.Steppable;
+import sim.field.grid.IntGrid2D;
+
+public class MapUpdater implements ModelState, Steppable{
+	
+		
+	IntGrid2D landMap;
+	HashMap<String, Integer> AFTIndexMap = new HashMap<String, Integer>();
+	CellSet cellSet;
+	private ModelRunner modelRunner;
+
+	@Override
+	public void setup(ModelRunner modelRunner) {
+		this.modelRunner = modelRunner;
+		this.landMap = modelRunner.landMap;
+		this.cellSet = modelRunner.getState(CellSet.class);
+		Set<String> typeSet = modelRunner.getState(DataLoader.class).getAgentTypeMap().keySet();
+		int i = 0;
+		for(String typeString : typeSet) {
+			AFTIndexMap.put(typeString, i);
+			i++;
+		}
+		
+	}
+
+	@Override
+	public void onStartGo() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void go() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onEndGo() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void step(SimState arg0) {
+		cellSet.forEach(cell->{
+			int x = cell.getInformationTable().getInt("x");
+			int y = cell.getInformationTable().getInt("y");
+			landMap.field[x][landMap.getHeight()-y] = AFTIndexMap.get(cell.getOwner().getManagerType());
+		});
+	}
+
+	@Override
+	public void toSchedule() {
+		modelRunner.schedule.scheduleRepeating(0, modelRunner.indexOf(this), this, 1.0);
+		
+	}
+
+}
