@@ -27,20 +27,6 @@ public class LandCell extends AbstractCell {
 
 	}
 
-	@Override
-	public void onStartGo() {
-		//calculateProtectionIndex(); //only when protected areas are considered
-	}
-
-	@Override
-	public void go() {
-// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void onEndGo() {
-// TODO Auto-generated method stub
-	}
 
 	@Override
 	public void initializeCapitalFilter() {
@@ -61,7 +47,7 @@ public class LandCell extends AbstractCell {
 	}
 
 	@Override
-	public void initializeProductionFilter(DataLoader dataLoader) {
+	public void initializeProductionFilter(DataCenter dataLoader) {
 //      This is default.
 		dataLoader.getServiceNameList().forEach(service -> {
 			productionFilter.put(service, 1.0);

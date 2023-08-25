@@ -8,8 +8,9 @@ import java.util.Set;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import tech.tablesaw.api.Table;
+import updaters.AbstractUpdater;
 
-public abstract class AbstractManager implements ModelState,Steppable {
+public abstract class AbstractManager extends AbstractUpdater {
 	protected ModelRunner modelRunner;
 	protected String managerType;
 	protected int id;
@@ -41,20 +42,6 @@ public abstract class AbstractManager implements ModelState,Steppable {
 
 	}
 
-	@Override
-	public void onStartGo() {
-
-	}
-
-	@Override
-	public void go() {
-		// onStartGo();
-//		managerProduce();
-		managerAbandon();
-		managerSearch();
-		managerCompete();
-		// onEndGo();
-	}
 
 	protected abstract void managerProduce();
 
@@ -64,10 +51,6 @@ public abstract class AbstractManager implements ModelState,Steppable {
 
 	protected abstract void managerCompete();
 
-	@Override
-	public void onEndGo() {
-		// managerProduce();
-	}
 
 	public String getManagerType() {
 		return managerType;
@@ -135,6 +118,10 @@ public abstract class AbstractManager implements ModelState,Steppable {
 
 	@Override
 	public void step(SimState args) {
-		go();
+//		managerProduce();
+		managerAbandon();
+		managerSearch();
+		managerCompete();
+
 	}
 }

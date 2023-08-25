@@ -1,8 +1,11 @@
-package crafty;
+package display;
 
 import java.awt.Color;
 import javax.swing.JFrame;
+import javax.swing.UIManager;
 
+import crafty.DataCenter;
+import crafty.ModelRunner;
 import sim.display.Console;
 import sim.display.Controller;
 import sim.display.Display2D;
@@ -19,20 +22,19 @@ public class ModelRunnerWithUI extends GUIState{
 	public JFrame displayFrame;
 	ValueGridPortrayal2D grid2D = new ValueGridPortrayal2D();
 	Inspector dataInspector;
-	//SimState state;
 	
 	public ModelRunnerWithUI() {
+
 		super(new ModelRunner(System.currentTimeMillis())); 
 	}
 	
 	public ModelRunnerWithUI(SimState state) {
 		super(state);
-//	    ((ModelRunner)state).loadStateManager();
-//	    ((ModelRunner)state).setup((ModelRunner)state);
+		
 	}
 	
 	public static String getName() {
-		return "CRAFTY-EU MASON Test";
+		return "CRAFTY";
 	}
 	
 	public Object getSimulationInspectedObject() { return state;}
@@ -49,10 +51,11 @@ public class ModelRunnerWithUI extends GUIState{
 		display = new Display2D(500,500, this);
 		display.setClipping(false);
 		displayFrame = display.createFrame();
-		displayFrame.setTitle("CRAFTY-EU");
+		displayFrame.setTitle("Display Center");
 		c.registerFrame(displayFrame);
 		displayFrame.setVisible(true);
-		display.attach(grid2D, "");		
+		display.attach(grid2D, "AFT map");		
+		
 	}
 	
 	public void start()
@@ -65,10 +68,11 @@ public class ModelRunnerWithUI extends GUIState{
 	{
 		super.load(state);
 		setupPortrayals();
+		
 	}
 	
 	public void setupPortrayals() {
-		int AFTnumber = ((ModelRunner) state).getState(DataLoader.class).getAgentTypeMap().size();
+		int AFTnumber = ((ModelRunner) state).getState(DataCenter.class).getAgentTypeMap().size();
 		grid2D.setMap(new SimpleColorMap(generateDistinctColors(AFTnumber+1)));
 		grid2D.setField(((ModelRunner) state).landMap);
 		
@@ -103,8 +107,19 @@ public class ModelRunnerWithUI extends GUIState{
         return distinctColors;
     }
 	
+	public static Object getInfo()
+	{
+	try { return new java.net.URL("https://landchange.imk-ifu.kit.edu/CRAFTY"); }
+	catch (java.net.MalformedURLException e) { return "Oops"; }
+	}
+	
 	
 	public static void main(String[] args) {
+		try {
+		    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception ex) {
+		    ex.printStackTrace();
+		}
 		ModelRunnerWithUI vid = new ModelRunnerWithUI();
 		Console c = new Console(vid);
 		c.setVisible(true);

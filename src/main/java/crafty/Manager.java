@@ -45,22 +45,6 @@ public class Manager extends AbstractManager {
 		// 0th tick.
 	}
 
-	@Override
-	public void onStartGo() {
-		// TODO Auto-generated method stub
-		super.onStartGo();
-	}
-
-	@Override
-	public void go() {
-		super.go();
-	}
-
-	@Override
-	public void onEndGo() {
-		// TODO Auto-generated method stub
-		super.onEndGo();
-	}
 
 	@Override
 	public String getManagerType() {
@@ -137,12 +121,12 @@ public class Manager extends AbstractManager {
 	@Override
 	protected void managerProduce() {
 		// initialize serviceProductionMap
-		serviceProductionMap = new HashMap<>(modelRunner.getState(DataLoader.class).getInitialZeroProductionMap());
+		serviceProductionMap = new HashMap<>(modelRunner.getState(DataCenter.class).getInitialZeroProductionMap());
 		List<String> serviceNameList = new ArrayList<String>(serviceProductionMap.keySet());
 		// calculate and sum up service production in each owned land cells.
 		landSet.forEach(landCell -> {
 			HashMap<String, Double> cellServiceProductionMap = Methods.cdProductionMap((LandCell) landCell, this,
-					modelRunner.getState(DataLoader.class));
+					modelRunner.getState(DataCenter.class));
 			serviceNameList.forEach(serviceName -> {
 				double existingServiceProduction = serviceProductionMap.get(serviceName);
 				double cellServiceProduction = cellServiceProductionMap.get(serviceName);
@@ -165,7 +149,8 @@ public class Manager extends AbstractManager {
 
 	@Override
 	protected void managerSearch() {
-		if (modelRunner.schedule.getTime() >= 1 && representative == true) {
+		//if (modelRunner.schedule.getTime() >= 1 && representative == true) {
+		if (representative == true) {
 			CellSet cellSet = modelRunner.getState(CellSet.class);
 
 			// search searchedNumber of others' landcells to see if there is any cell can be
@@ -180,36 +165,36 @@ public class Manager extends AbstractManager {
 				if (landCell.getOwner() != this) {
 
 					HashMap<String, Double> mySerivceMapHere = Methods.cdProductionMap((LandCell) landCell, this,
-							modelRunner.getState(DataLoader.class));
+							modelRunner.getState(DataCenter.class));
 					double myCompetitiveness = Methods.calculateCompetitivness(mySerivceMapHere,
-							modelRunner.getState(DataLoader.class).getUtitlityMap(), modelRunner);
+							modelRunner.getState(DataCenter.class).getUtitlityMap(), modelRunner);
 					double otherCompetitiveness = Methods.calculateCompetitivness(landCell.getServiceProductionMap(),
-							modelRunner.getState(DataLoader.class).getUtitlityMap(), modelRunner); // you might think
+							modelRunner.getState(DataCenter.class).getUtitlityMap(), modelRunner); // you might think
 																									// this is
 																									// unnecessary. This
 																									// part is remained
 																									// from
 																									// one-owner-many-lands
 																									// code
-					if (myCompetitiveness > otherCompetitiveness & new Random().nextDouble() < modelRunner.getThreshold()) {
+					if (myCompetitiveness > otherCompetitiveness & new Random().nextDouble() <  modelRunner.getThreshold()) {
 						// 1.the previous owner remove this cell from its landSet
 						landCell.getOwner().getLandSet().remove(landCell);
 						// 1.5 if the previous owner is not representative and has not land, then remove
 						// it from ManagerSet.
 						if (landCell.getOwner().isRepresentative() != true
 								&& landCell.getOwner().getLandSet().size() == 0) {
-							modelRunner.getState(DataLoader.class).getManagerSet().remove(landCell.getOwner());
+							modelRunner.getState(DataCenter.class).getManagerSet().remove(landCell.getOwner());
 						}
 						// 2.this landCell set the owner to this new manager
 						Manager newOwnerManager = this.clone();
 						newOwnerManager.mutate(0.0, 0.1);
-						modelRunner.getState(DataLoader.class).getManagerSet().add(newOwnerManager);
+						modelRunner.getState(DataCenter.class).getManagerSet().add(newOwnerManager);
 						landCell.setOwner(newOwnerManager);
 						// 3.this new manager add this landCell to its landSet
 						landCell.getOwner().getLandSet().add(landCell);
 						// 4.this landCell update its service production according to the new owner
 						HashMap<String, Double> newSerivceMapHere = Methods.cdProductionMap((LandCell) landCell,
-								newOwnerManager, modelRunner.getState(DataLoader.class));
+								newOwnerManager, modelRunner.getState(DataCenter.class));
 						landCell.setServiceProductionMap(newSerivceMapHere);
 						landCell.getOwner().setServiceProductionMap(newSerivceMapHere);
 
@@ -275,8 +260,8 @@ public class Manager extends AbstractManager {
 
 	@Override
 	public void toSchedule() {
-		modelRunner.schedule.scheduleRepeating(0, modelRunner.indexOf(this), this, 1.0);
-		
+		modelRunner.schedule.scheduleRepeating(0, modelRunner.indexOf(modelRunner.getState(ManagerSet.class)), this, 1.0);
+	//	modelRunner.schedule.scheduleRepeating(0, -1, this, 1.0);
 	}
 
 //	private Manager managerSpawn(Manager originManager){

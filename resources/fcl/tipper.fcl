@@ -1,0 +1,158 @@
+/*
+	Example: A tip calculation FIS (fuzzy inference system)
+	Calculates tip based on 'service' and 'food'
+
+									Pablo Cingolani 
+*/
+
+FUNCTION_BLOCK tipper	// Block definition (there may be more than one block per file)
+
+// Define input variables
+VAR_INPUT				
+	service : REAL;
+	food : REAL;
+END_VAR
+
+// Define output variable
+VAR_OUTPUT				
+	tip : REAL;
+END_VAR
+
+// Fuzzify input variable 'service': {'poor', 'good' , 'excellent'}
+FUZZIFY service			
+	TERM poor := (0, 1) (4, 0) ; 
+	TERM good := (1, 0) (4,1) (6,1) (9,0);
+	TERM excellent := (6, 0) (9, 1);
+END_FUZZIFY
+
+// Fuzzify input variable 'food': { 'rancid', 'delicious' }
+FUZZIFY food			
+	TERM rancid := (0, 1) (1, 1) (3,0) ;
+	TERM delicious := (7,0) (9,1);
+END_FUZZIFY
+
+// Defzzzify output variable 'tip' : {'cheap', 'average', 'generous' }
+DEFUZZIFY tip			
+	TERM cheap := (0,0) (5,1) (10,0);
+	TERM average := (10,0) (15,1) (20,0);
+	TERM generous := (20,0) (25,1) (30,0);
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+// Inference rules
+RULEBLOCK No1
+	AND : MIN;	// Use 'min' for 'and'
+	ACT : MIN;	// Use 'min' activation method
+	ACCU : MAX;	// Use 'max' accumulation method
+
+	RULE 1 : IF service IS poor OR food IS rancid THEN tip IS cheap;
+	RULE 2 : IF service IS good AND food IS NOT rancid THEN tip IS average; 
+	RULE 3 : IF service IS excellent AND food IS delicious THEN tip IS generous;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
+//////////////////////////////////////////////////////////////////////////////////////////
+FUNCTION_BLOCK policy	// Block definition (there may be more than one block per file)
+
+// Define input variables
+VAR_INPUT				
+	gap: REAL;
+END_VAR
+
+// Define output variable
+VAR_OUTPUT				
+	intervention : REAL;
+END_VAR
+
+// Fuzzify input variable 'gap': {'nhigh', 'nmild' , 'nlight', ’neutral’, ’plight’, ’pmild’, ’phigh’}
+FUZZIFY gap			
+	TERM nhigh := (-0.5,1) (-0.3,0); 
+	TERM nmild := (-0.5,0) (-0.3,1) (-0.1,0);
+	TERM nlight := (-0.3,0) (-0.1,1) (0,0);
+	TERM neutral := (-0.05,0) (0,1) (0.05,0);
+	TERM plight := (0, 0) (0.1, 1) (0.3,0);
+	TERM pmild := (0.1,0) (0.3,1) (0.5,0);
+	TERM phigh := (0.3, 0) (0.5, 1);
+END_FUZZIFY
+
+
+// Defzzzify output variable intervention: { 'nhigh',’nmild’,’neutral’,’pmild’, 'phigh' }
+DEFUZZIFY intervention			
+	TERM nhigh := (-0.2,1) (-0.1,0);
+	TERM nmild := (-0.1,0) (-0.05,1) (0,0);
+	TERM neutral := (-0.02,0) (0,1) (0.02,0);
+	TERM pmild := (0,0) (0.05,1) (0.1,0);
+	TERM phigh := (0.1,0) (0.2,1);
+
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+// Inference rules
+RULEBLOCK No1
+	AND : MIN;	// Use 'min' for 'and'
+	ACT : MIN;	// Use 'min' activation method
+	ACCU : MAX;	// Use 'max' accumulation method
+
+	RULE 1 : IF gap IS nhigh  THEN intervention IS nhigh;
+	RULE 2 : IF gap IS nmild  THEN intervention IS nmild; 
+	RULE 3 : IF gap IS nlight THEN intervention IS neutral;
+	RULE 4 : IF gap IS neutral THEN intervention IS neutral;
+	RULE 5 : IF gap IS plight THEN intervention IS neutral;
+	RULE 6 : IF gap IS pmild THEN intervention IS pmild;
+	RULE 7 : IF gap IS phigh THEN intervention IS phigh;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
+
+///------------------------------------------------------------------------------
+
+FUNCTION_BLOCK foodEmployment	// Block definition (there may be more than one block per file)
+
+// Define input variables
+VAR_INPUT				
+	employment: REAL;
+	foodProduction: REAL;
+END_VAR
+
+// Define output variable
+VAR_OUTPUT				
+	subsidy : REAL;
+END_VAR
+
+// Fuzzify input variable 'employment': {'low', 'high'} 
+FUZZIFY employment			
+	TERM low := (0, 1) (0.1, 1) (0.3,0) ;
+	TERM high := (0.7,0) (1.0,1);
+END_FUZZIFY
+
+
+// Fuzzify input variable 'foodProduction': {'poor', 'good' , 'excellent'}
+FUZZIFY foodProduction			
+	TERM low := (0, 1) (0.4, 0); 
+	TERM medium := (0.1, 0) (0.4,1) (0.6,1) (0.9,0);
+	TERM high := (0.6, 0) (1.0, 1);
+END_FUZZIFY
+
+// Defzzzify output variable 'subsidy' : {'cheap', 'average', 'generous' }
+DEFUZZIFY subsidy			
+	TERM cheap := (0,0) (0.5,1) (1.0,0);
+	TERM average := (1.0,0) (1.5,1) (2.0,0);
+	TERM generous := (2.0,0) (2.5,1) (3.0,0);
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+// Inference rules
+RULEBLOCK No1
+	AND : MIN;	// Use 'min' for 'and'
+	ACT : MIN;	// Use 'min' activation method
+	ACCU : MAX;	// Use 'max' accumulation method
+
+	RULE 1 : IF employment IS low OR foodProduction IS low THEN subsidy IS generous;
+	RULE 2 : IF foodProduction IS medium AND employment IS NOT low THEN subsidy IS average; 
+	RULE 3 : IF employment IS high AND foodProduction IS high THEN subsidy IS cheap;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK

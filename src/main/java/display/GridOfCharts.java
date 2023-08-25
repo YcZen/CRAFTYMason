@@ -1,4 +1,4 @@
-package crafty;
+package display;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -9,6 +9,9 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import crafty.DataCenter;
+import crafty.ModelRunner;
+import crafty.ModelState;
 import net.sourceforge.jFuzzyLogic.fcl.FclParser.declaration_return;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -17,6 +20,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.PreparedStatement;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class GridOfCharts implements ModelState,Steppable {
@@ -31,7 +35,7 @@ public class GridOfCharts implements ModelState,Steppable {
     private HashMap<String, XYSeries> totalDemandSeries = new HashMap<String, XYSeries>();
     private HashMap<String, Double> productionHashMap;
 	private HashMap<String, Double> demandHashMap;
-	private boolean isInilized = false;
+
     
     public GridOfCharts() {
     	
@@ -42,26 +46,26 @@ public class GridOfCharts implements ModelState,Steppable {
     }
     
     public void prepare() {
-    	productionHashMap = modelRunner.getState(DataLoader.class).getGlobalProductionMap();
-    	demandHashMap = modelRunner.getState(DataLoader.class).getAnualDemand();
-    
-
-         for (String productName : productionHashMap.keySet()) {
+    	productionHashMap = modelRunner.getState(DataCenter.class).getGlobalProductionMap();
+    	demandHashMap = modelRunner.getState(DataCenter.class).getAnualDemand();
+    	List<String> serviceNameList = modelRunner.getState(DataCenter.class).getServiceNameList();
+    	
+         for (String serviceName : serviceNameList) {
         	 
         	 XYSeriesCollection dataset = new XYSeriesCollection();
              JFreeChart chart;
              
-             XYSeries supplySeries = new XYSeries(productName + " Supply");
-             XYSeries demandSeries = new XYSeries(productName + " Demand");
+             XYSeries supplySeries = new XYSeries(serviceName + " Supply");
+             XYSeries demandSeries = new XYSeries(serviceName + " Demand");
              
-             totalProductionSeries.put(productName, supplySeries);
-             totalDemandSeries.put(productName,demandSeries);
+             totalProductionSeries.put(serviceName, supplySeries);
+             totalDemandSeries.put(serviceName,demandSeries);
              
                  dataset.addSeries(supplySeries);
                  dataset.addSeries(demandSeries);
                 
                  chart = ChartFactory.createXYLineChart(
-                		 productName, "Time", "Quantity", dataset);
+                		 serviceName, "Time", "Quantity", dataset);
                  
               // Set chart and plot background to white
                  chart.setBackgroundPaint(Color.WHITE);
@@ -77,7 +81,7 @@ public class GridOfCharts implements ModelState,Steppable {
          }
          
      
-			int dataSize = modelRunner.getState(DataLoader.class).getGlobalProductionMap().size();
+			int dataSize = modelRunner.getState(DataCenter.class).getGlobalProductionMap().size();
 			int gridWidth = (int) Math.ceil(Math.sqrt(dataSize));
 			frame.setLayout(new GridLayout(gridWidth, gridWidth));
 			frame.pack();
@@ -89,7 +93,7 @@ public class GridOfCharts implements ModelState,Steppable {
     }
 
     private void updateChart() {
-        modelRunner.getState(DataLoader.class).getServiceNameList().forEach(productionName -> {
+        modelRunner.getState(DataCenter.class).getServiceNameList().forEach(productionName -> {
         	totalProductionSeries.get(productionName).add(modelRunner.schedule.getSteps(), productionHashMap.get(productionName));
         	totalDemandSeries.get(productionName).add(modelRunner.schedule.getSteps(),demandHashMap.get(productionName));
         });
@@ -98,7 +102,7 @@ public class GridOfCharts implements ModelState,Steppable {
 	@Override
 	public void step(SimState arg0) {
 		updateChart();
-		
+	//	System.out.println("Charts step");
 	}
 
 	@Override
@@ -112,23 +116,6 @@ public class GridOfCharts implements ModelState,Steppable {
 		
 	}
 
-	@Override
-	public void onStartGo() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void go() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onEndGo() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void toSchedule() {

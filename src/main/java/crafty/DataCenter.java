@@ -8,13 +8,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import tech.tablesaw.api.Row;
 import tech.tablesaw.api.Table;
 
 // This class is not abtract enough. It should be made more abstract later.
-public class DataLoader implements ModelState, Steppable{
+public class DataCenter implements ModelState{//, Steppable{
 
 	private HashMap<String, Manager> agentTypeMap = new HashMap<>();
 	private CellSet cellSet = new CellSet();
@@ -48,23 +50,23 @@ public class DataLoader implements ModelState, Steppable{
 
 	private String agentDataDirectory, cellDataPath, anualCapitalFilePath, anualDemandFile;
 
-	public DataLoader(String agentDataDirectory, String cellDataPath) {
+	public DataCenter(String agentDataDirectory, String cellDataPath) {
 		this.agentDataDirectory = agentDataDirectory;
 		this.cellDataPath = cellDataPath;
 	}
 
-	public DataLoader(String agentDataDirectory, String cellDataPath, String anualCapitalFilePath) {
+	public DataCenter(String agentDataDirectory, String cellDataPath, String anualCapitalFilePath) {
 		this(agentDataDirectory, cellDataPath);
 		this.anualCapitalFilePath = anualCapitalFilePath;
 	}
 
-	public DataLoader(String agentDataDirectory, String cellDataPath, String anualCapitalFilePath,
+	public DataCenter(String agentDataDirectory, String cellDataPath, String anualCapitalFilePath,
 			String anualDemandFile) {
 		this(agentDataDirectory, cellDataPath, anualCapitalFilePath);
 		this.anualDemandFile = anualDemandFile;
 	}
 
-	public DataLoader(String serviceNameFile, String capitalNameFile, String agentDataDirectory, String cellDataPath,
+	public DataCenter(String serviceNameFile, String capitalNameFile, String agentDataDirectory, String cellDataPath,
 			String anualCapitalFilePath, String anualDemandFile) {
 		this(agentDataDirectory, cellDataPath, anualCapitalFilePath);
 		this.anualDemandFile = anualDemandFile;
@@ -89,54 +91,32 @@ public class DataLoader implements ModelState, Steppable{
 		this.anualCapitalFileIterator = Arrays.stream(anualCapitalFileDir.listFiles()).iterator();
 		loadAnualDemandDataToIterator(anualDemandFile);
 		
+		System.out.println("==========" + utitlityMap + "===========");
 	}
 
-	@Override
-	public void onStartGo() {
-		updateDemand();
-		// we use updateSupply to calculate the initial supply produced by all managers
-		// in their setup method. Normally, update supply should be calculated after
-		// competitions.
-		if (modelRunner.schedule.getTime() == 0.) {
-			updateSupply();
-			for (HashMap.Entry<String, Double> entry : globalProductionMap.entrySet()) {
-				String key = entry.getKey();
-				Double value = entry.getValue();
-				initSupplyMap.put(key, value);
-			}
-			System.out.println("initial globalProductionMap--" + globalProductionMap);
 
-		}
-		// utility is calculated using last-tick supply and current demand.
-		updateUtility();
-		updateAnualCellCapitals();
-		if (strategy != null) {
-			updateCurrentStrategy((int) modelRunner.schedule.getTime());
-		}
-
-	}
-
-	@Override
-	public void go() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onEndGo() {
-		updateSupply();
-
-	}
 
 	private void prepareSerivceNames(String serviceNameFile) {
-		Table serviceNameTable = Table.read().csv(serviceNameFile);
-		serviceNameList = serviceNameTable.stringColumn("Name").asList();
-		int tableLength = serviceNameTable.rowCount();
-		for (int i = 0; i < tableLength; i++) {
-			String keyString = serviceNameTable.stringColumn("Name").getString(i);
-			int index = serviceNameTable.intColumn("Index").get(i);
-			serviceNameIndexMap.put(keyString, index);
-		}
+	    try {
+	        Table serviceNameTable = Table.read().csv(serviceNameFile);
+	        serviceNameList = serviceNameTable.stringColumn("Name").asList();
+	        int tableLength = serviceNameTable.rowCount();
+	        for (int i = 0; i < tableLength; i++) {
+	            String keyString = serviceNameTable.stringColumn("Name").getString(i);
+	            int index = serviceNameTable.intColumn("Index").get(i);
+	            serviceNameIndexMap.put(keyString, index);
+	        }
+	    } catch (Exception e) {
+	        JOptionPane.showMessageDialog(null, "Error reading the file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	    }
+//		Table serviceNameTable = Table.read().csv(serviceNameFile);
+//		serviceNameList = serviceNameTable.stringColumn("Name").asList();
+//		int tableLength = serviceNameTable.rowCount();
+//		for (int i = 0; i < tableLength; i++) {
+//			String keyString = serviceNameTable.stringColumn("Name").getString(i);
+//			int index = serviceNameTable.intColumn("Index").get(i);
+//			serviceNameIndexMap.put(keyString, index);
+//		}
 	}
 
 	private void prepareCapitalNames(String capitalNameFile) {
@@ -196,7 +176,7 @@ public class DataLoader implements ModelState, Steppable{
 			managerSet.add(manager);
 			mapWidth = Math.max(mapWidth, x);// this variable is for map visualization
 			mapHeight = Math.max(mapHeight, y);// this variable is for map visualization
-
+			manager.setId(i);
 		}
 	}
 
@@ -287,6 +267,7 @@ public class DataLoader implements ModelState, Steppable{
 			utitlityMap.put(serviceName, (anualDemandMap.get(serviceName) - globalProductionMap.get(serviceName)));
 					/// globalProductionMap.get(serviceName));
 		});
+	//	System.out.println("Utility updated: ---->> "+ modelRunner.schedule.getSteps() + " ----->>"  + utitlityMap.get("Meat"));
 	}
 
 	public void updateCurrentStrategy(int ticks) {
@@ -366,17 +347,16 @@ public class DataLoader implements ModelState, Steppable{
 		return time;
 	}
 
-	@Override
-	public void step(SimState state) {
-		onStartGo();
-		time++;
-		//System.out.println(anualDemandMap);
-	}
 
 	@Override
 	public void toSchedule() {
-		modelRunner.schedule.scheduleRepeating(0, modelRunner.indexOf(this) , this, 1.0);
-		
+
 	}
+//
+//	@Override
+//	public void step(SimState arg0) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
 }

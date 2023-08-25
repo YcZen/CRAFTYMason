@@ -1,49 +1,34 @@
-package crafty;
+package updaters;
 
 import java.util.HashMap;
 import java.util.Set;
 
+import crafty.CellSet;
+import crafty.DataCenter;
+import crafty.ModelRunner;
+import crafty.ModelState;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.grid.IntGrid2D;
 
-public class MapUpdater implements ModelState, Steppable{
+public class MapUpdater extends AbstractUpdater{
 	
 		
 	IntGrid2D landMap;
 	HashMap<String, Integer> AFTIndexMap = new HashMap<String, Integer>();
 	CellSet cellSet;
-	private ModelRunner modelRunner;
 
 	@Override
 	public void setup(ModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
 		this.landMap = modelRunner.landMap;
 		this.cellSet = modelRunner.getState(CellSet.class);
-		Set<String> typeSet = modelRunner.getState(DataLoader.class).getAgentTypeMap().keySet();
+		Set<String> typeSet = modelRunner.getState(DataCenter.class).getAgentTypeMap().keySet();
 		int i = 0;
 		for(String typeString : typeSet) {
 			AFTIndexMap.put(typeString, i);
 			i++;
 		}
-		
-	}
-
-	@Override
-	public void onStartGo() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void go() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onEndGo() {
-		// TODO Auto-generated method stub
 		
 	}
 	
@@ -53,6 +38,7 @@ public class MapUpdater implements ModelState, Steppable{
 			int x = cell.getInformationTable().getInt("x");
 			int y = cell.getInformationTable().getInt("y");
 			landMap.field[x][landMap.getHeight()-y] = AFTIndexMap.get(cell.getOwner().getManagerType());
+		//	landMap.field[x][y] = AFTIndexMap.get(cell.getOwner().getManagerType());
 		});
 	}
 

@@ -1,69 +1,177 @@
-package Insitution;
+package insitution;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Policy {
-	String serviceType;
-	double policyGoal;
-	double interventionModifier = 0;
-	double intervention = 0;
-	List<Double> decomposedGoals = new ArrayList<>();
-	List<Double> policyApplied = new ArrayList<>();
-	List<Double> predictedDemand = new ArrayList<>();
-	List<Double> predictedSupply = new ArrayList<>();
+	
+    private String policyName = "Default Policy";
+    private String targetService;
+    private PolicyType type = PolicyType.None;
+    private double initialguess = 0.0;
+    private double inertia = 0.0;
+    private double goal;
+    double interventionModifier = 0;
+    double evluation;
+    int policyLag = 5;
+    double intervention = 0;
+    boolean startChanging = false;
+    private List<Double> policyHistory = new ArrayList();
 
-	public String getServiceType() {
-		return serviceType;
+    private Policy(Builder builder) {
+        this.policyName = builder.policyName;
+        this.type = builder.type;
+        this.initialguess = builder.initialguess;
+        this.inertia = builder.inertia;
+        this.goal = builder.goal;
+        this.policyLag = builder.policyLag;
+        this.targetService = builder.targetService;
+    }
+
+    public static class Builder {
+        public String targetService;
+		private String policyName;
+        private PolicyType type ;
+        private double initialguess ;
+        private double inertia ;
+        private double goal ;
+        private int policyLag;
+        
+        public Builder policyName(String policyName) {
+            this.policyName = policyName;
+            return this;
+        }
+
+        public Builder type(PolicyType type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder initialGuess(double initialguess) {
+            this.initialguess = initialguess;
+            return this;
+        }
+
+        public Builder inertia(double inertia) {
+            this.inertia = inertia;
+            return this;
+        }
+
+        public Builder goal(double goal) {
+            this.goal = goal;
+            return this;
+        }
+        
+        public Builder policyLag(int policyLag) {
+        	this.policyLag = policyLag;
+        	return this;
+        }
+        
+        public Builder targetService(String serviceName) {
+        	this.targetService = serviceName;
+        	return this;
+        }
+
+        public Policy build() {
+        	 
+            return new Policy(this);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Policy{" +
+                "policyName='" + policyName + '\'' +
+                ", type='" + type + '\'' +
+                ", initialguess=" + initialguess +
+                ", inertia=" + inertia +
+                ", goal=" + goal +
+                '}';
+    }
+    
+	public String getName() {
+		return policyName;
 	}
 
-	public double getPolicyGoal() {
-		return policyGoal;
+    public double getInterventionModifier() {
+		return interventionModifier;
 	}
 
-	public List<Double> getDecomposedGoals() {
-		return decomposedGoals;
+	public void setInterventionModifier(double interventionModifier) {
+		this.interventionModifier = interventionModifier;
 	}
 
-	public List<Double> getPolicyApplied() {
-		return policyApplied;
+	public double getEvluation() {
+		return evluation;
 	}
 
-	public void setServiceType(String serviceType) {
-		this.serviceType = serviceType;
+	public void setEvluation(double evluation) {
+		this.evluation = evluation;
 	}
 
-	public void setPolicyGoal(double policyGoal) {
-		this.policyGoal = policyGoal;
+	public String getTargetService() {
+		return targetService;
 	}
 
-	public void setDecomposedGoals(List<Double> decomposedGoals) {
-		this.decomposedGoals = decomposedGoals;
+
+	public int getPolicyLag() {
+		return policyLag;
+	}
+	
+	public double getGoal() {
+		return goal;
 	}
 
-	public List<Double> getPredictedDemand() {
-		return predictedDemand;
+	public void updateIntervention() {
+		intervention = interventionModifier * initialguess;
 	}
-
-	public List<Double> getPredictedSupply() {
-		return predictedSupply;
-	}
-
-	public void setIntervModifier(double intervModifier) {
-		this.interventionModifier = intervModifier;
-	}
-
-	public double getIntervModifier() {
-		return this.interventionModifier;
-	}
-
-	public void setIntervention(double intervention) {
-		this.intervention = intervention;
-
-	}
-
+	
 	public double getIntervention() {
-		return this.intervention;
+		return intervention;
 	}
+	
+	public double getInertia() {
+		return inertia;
+	}
+
+	public PolicyType getType() {
+		return type;
+	}
+
+//	public void setIntervention(double intervention) {
+//		this.intervention = intervention;
+//	}
+
+	public boolean isStartChanging() {
+		return startChanging;
+	}
+
+	public void setStartChanging(boolean startChanging) {
+		this.startChanging = startChanging;
+	}
+
+	public double getLatestHistory() {
+		return policyHistory.get(policyHistory.size()-1);
+	}
+	
+	public List<Double> getHistory(){
+		return policyHistory;
+	}
+
+	public void updatePolicyHistory() {
+		policyHistory.add(intervention);
+	}
+
+	public void setIntervention(double constrainedIntervention) {
+		this.intervention = constrainedIntervention;
+		
+	}
+
+	public void setGoal(double goal2) {
+		this.goal = goal2;
+		
+	}
+
 
 }
+

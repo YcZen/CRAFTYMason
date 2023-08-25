@@ -1,4 +1,4 @@
-package Insitution;
+package insitution;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -6,11 +6,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import crafty.DataLoader;
+import crafty.DataCenter;
 import crafty.ModelRunner;
 import crafty.ModelState;
+import sim.engine.SimState;
+import sim.engine.Steppable;
 
-public class PolicyMakerSet extends HashSet<PolicyMaker> implements ModelState {
+public class PolicyMakerSet extends HashSet<PolicyMaker> implements ModelState, Steppable {
 
 	/**
 	 * 
@@ -28,27 +30,6 @@ public class PolicyMakerSet extends HashSet<PolicyMaker> implements ModelState {
 
 	}
 
-	@Override
-	public void onStartGo() {
-
-	}
-
-	@Override
-	public void go() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onEndGo() {
-		// making policy for next tick
-		updateHistory();
-		if (modelRunner.schedule.getTime() == 0.) {
-			setGoals();
-		}
-		refreshInterventionMap();
-		makePolicies();
-	}
 
 	public PolicyMaker findPolicyMaker(int id) {
 		PolicyMaker target = null;
@@ -70,7 +51,7 @@ public class PolicyMakerSet extends HashSet<PolicyMaker> implements ModelState {
 		// add agricultural policyMaker
 		PolicyMaker agriPolicyMaker = new PolicyMaker();
 		agriPolicyMaker.setID(0);
-		agriPolicyMaker.setFinalGoal(modelRunner, 1, 0.7,5000000.);
+		agriPolicyMaker.setFinalGoal(modelRunner, 1, 0.5,5000000.);
 	 //   agriPolicyMaker.setGoals(modelRunner, 1, 3.0);
 		//agriPolicyMaker.setGoals(modelRunner, 0, 2.5);
 		// agriPolicyMaker.setGoals(modelRunner, 4, 0.7);
@@ -81,7 +62,7 @@ public class PolicyMakerSet extends HashSet<PolicyMaker> implements ModelState {
 		PolicyMaker forePolicyMaker = new PolicyMaker();
 		forePolicyMaker.setID(1);
 		forePolicyMaker.setFinalGoal(modelRunner, 2, 2.,10000.);
-		this.add(forePolicyMaker);
+	//	this.add(forePolicyMaker);
 
 		// add Recreation policyMaker
 		PolicyMaker recrPolicyMaker = new PolicyMaker();
@@ -93,7 +74,7 @@ public class PolicyMakerSet extends HashSet<PolicyMaker> implements ModelState {
 
 	private void refreshInterventionMap() {
 		interventionMap = new HashMap<>();
-		modelRunner.getState(DataLoader.class).getServiceNameList().forEach(service -> {
+		modelRunner.getState(DataCenter.class).getServiceNameList().forEach(service -> {
 			interventionMap.put(service, 0.);
 		});
 
@@ -124,7 +105,7 @@ public class PolicyMakerSet extends HashSet<PolicyMaker> implements ModelState {
 	}
 
 	private void updateHistory() {
-		DataLoader dataLoader = modelRunner.getState(DataLoader.class);
+		DataCenter dataLoader = modelRunner.getState(DataCenter.class);
 		if (modelRunner.schedule.getTime() == 0.) {
 			dataLoader.getServiceNameList().forEach(service -> {
 				List<Double> demandHistoryList = new ArrayList<Double>();
@@ -160,7 +141,18 @@ public class PolicyMakerSet extends HashSet<PolicyMaker> implements ModelState {
 
 	@Override
 	public void toSchedule() {
-		// TODO Auto-generated method stub
+		modelRunner.schedule.scheduleRepeating(0, modelRunner.indexOf(this), this, 1.0);		
+	}
+
+	@Override
+	public void step(SimState arg0) {
+		// making policy for next tick
+		updateHistory();
+		if (modelRunner.schedule.getTime() == 0.) {
+			setGoals();
+		}
+		refreshInterventionMap();
+		makePolicies();
 		
 	}
 }

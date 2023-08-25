@@ -1,4 +1,4 @@
-package Insitution;
+package insitution;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,7 +10,7 @@ import org.checkerframework.checker.units.qual.Length;
 
 import crafty.AbstractCell;
 import crafty.CellSet;
-import crafty.DataLoader;
+import crafty.DataCenter;
 import crafty.LandCell;
 import crafty.ModelRunner;
 import crafty.ModelState;
@@ -22,7 +22,7 @@ public class ProtectionMaker implements ModelState {
 	double collectUnprotectedProportion;
 	ModelRunner modelRunner;
 	HashSet<AbstractCell> unProtectedSet = new HashSet<>();
-	protected HashMap<String, Policy> policyMap = new HashMap<>();
+	protected HashMap<String, SimplePolicy> policyMap = new HashMap<>();
 	protected double supplyPredicted;
 	protected double learningRate = 0.3;
 	protected Integer id = null;
@@ -35,7 +35,7 @@ public class ProtectionMaker implements ModelState {
 		for (int i = startYear; i <= endYear; i++) {
 			goalsDoubles.add(slope * (double) i + intercept);
 		}
-		Policy policy = new Policy();
+		SimplePolicy policy = new SimplePolicy();
 		policy.setServiceType(serviceType);
 		policy.setPolicyGoal(endQuantity);
 		policy.setDecomposedGoals(goalsDoubles);
@@ -45,10 +45,10 @@ public class ProtectionMaker implements ModelState {
 	public ProtectionMaker setGoals(ModelRunner modelRunner, int serviceIndex, double quantity) {
 		// this.modelRunner = modelRunner;
 
-		this.serviceType = modelRunner.getState(DataLoader.class).getServiceNameList().get(serviceIndex);
+		this.serviceType = modelRunner.getState(DataCenter.class).getServiceNameList().get(serviceIndex);
 		int startYear = 0;
 		int endYear = modelRunner.totalTicks;
-		double startQuantity = modelRunner.getState(DataLoader.class).getInitSupplyMap().get(serviceType);
+		double startQuantity = modelRunner.getState(DataCenter.class).getInitSupplyMap().get(serviceType);
 		double endQuantity = quantity * startQuantity;
 		setGoals(serviceType, startYear, endYear, startQuantity, endQuantity);
 		modelRunner.getState(CellSet.class).forEach(cell -> {
@@ -71,7 +71,7 @@ public class ProtectionMaker implements ModelState {
 	// 3. Evaluate historic policy effectiveness.
 	// 4. Adjust policy intervention coefficient.
 	public void updatePolicyModifier(String service, List<Double> historicalSupply) {
-		Policy policy = policyMap.get(service);
+		SimplePolicy policy = policyMap.get(service);
 		double interventionModifier = policy.getIntervModifier();
 		int recentTicks = 5;
 		if (historicalSupply.size() >= recentTicks) {
@@ -106,7 +106,7 @@ public class ProtectionMaker implements ModelState {
 
 	// 6. Make policy
 	public void makePolicy(String service) {
-		Policy policy = policyMap.get(service);
+		SimplePolicy policy = policyMap.get(service);
 		// making policy for next tick, so the goal should be the goal in next tick.
 		policy.setIntervention(policy.getIntervModifier());// * 2000);
 		// intervention=policy.getIntervention();
@@ -152,12 +152,12 @@ public class ProtectionMaker implements ModelState {
 		return id;
 	}
 
-	public HashMap<String, Policy> getPolicyMap() {
+	public HashMap<String, SimplePolicy> getPolicyMap() {
 		return policyMap;
 	}
 
 	public void setProtectedAreas(String serviceType) {
-		Policy policy = policyMap.get(serviceType);
+		SimplePolicy policy = policyMap.get(serviceType);
 		double intervention = policy.getIntervention();
 		//int n = (int) (unProtectedSet.size() * intervention); 
 		int n = (int) (unProtectedSet.size() * 0.3);
@@ -203,7 +203,7 @@ public class ProtectionMaker implements ModelState {
 			landCell.getProductionFilter().put("Rereation", 1.0);
 			
 			//update production on protected area
-			modelRunner.getState(DataLoader.class).getServiceNameList().forEach(service -> {
+			modelRunner.getState(DataCenter.class).getServiceNameList().forEach(service -> {
 				double newProduction = landCell.getServiceProductionMap().get(service) * landCell.getProductionFilter().get(service);
 				landCell.getServiceProductionMap().put(service, newProduction);
 				
@@ -224,7 +224,7 @@ public class ProtectionMaker implements ModelState {
 
 	}
 
-	@Override
+	
 	public void onStartGo() {
 		if (modelRunner.schedule.getTime() == 0) {
 			setGoals(modelRunner, 2, 2.0);
@@ -234,13 +234,13 @@ public class ProtectionMaker implements ModelState {
 
 	}
 
-	@Override
+	
 	public void go() {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
+	
 	public void onEndGo() {
 		updateCollectedData();
 		updatePolicyModifier(serviceType,

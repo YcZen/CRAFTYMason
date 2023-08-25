@@ -5,11 +5,6 @@ public interface ModelState {
 	
 	public void setup(ModelRunner modelRunner);
 
-	public void onStartGo();
-
-	public void go();
-
-	public void onEndGo();	
 	
 	public void toSchedule();
 	

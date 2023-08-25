@@ -3,13 +3,13 @@ package crafty;
 
 import java.util.HashMap;
 
-import Insitution.PolicyMakerSet;
+import insitution.PolicyMakerSet;
 import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.Table;
 
 public class Methods {
 
-	public static Table cdProduction(LandCell landCell, Manager manager, DataLoader dataLoader) {
+	public static Table cdProduction(LandCell landCell, Manager manager, DataCenter dataLoader) {
 		// Table modifiableServiceTable = dataLoader.getInitialServiceTable();
 		Table modifiableServiceTable = Table.create();
 		for (String serviceName : dataLoader.getServiceNameList()) {
@@ -27,7 +27,7 @@ public class Methods {
 		return modifiableServiceTable;
 	}
 
-	public static HashMap<String, Double> cdProductionMap(LandCell landCell, Manager manager, DataLoader dataLoader) {
+	public static HashMap<String, Double> cdProductionMap(LandCell landCell, Manager manager, DataCenter dataLoader) {
 		// Table modifiableServiceTable = dataLoader.getInitialServiceTable();
 		// Table modifiableServiceTable = Table.create();
 		HashMap<String, Double> serviceProductionHashMap = new HashMap<>();
@@ -83,7 +83,7 @@ public class Methods {
 								// (modelRunner.getState(DataLoader.class).getGlobalProductionMap().get(serviceName))
 								// *
 					productionHashMap.get(serviceName) * (utilityhaHashMap.get(serviceName) + intervention)
-							* modelRunner.getState(DataLoader.class).getCurrentStrategy().get(serviceName);
+							* modelRunner.getState(DataCenter.class).getCurrentStrategy().get(serviceName);
 						//	* modelRunner.getState(TechnologySet.class).getTechnology(serviceName).getState();
 		}
 		return competitivness;

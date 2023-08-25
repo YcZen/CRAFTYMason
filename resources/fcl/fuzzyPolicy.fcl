@@ -1,0 +1,143 @@
+
+//////////////////////////////////////////////////////////////////////////////////////////
+FUNCTION_BLOCK policy	// Block definition (there may be more than one block per file)
+
+// Define input variables
+VAR_INPUT				
+	gap: REAL;
+END_VAR
+
+// Define output variable
+VAR_OUTPUT				
+	intervention : REAL;
+END_VAR
+
+// Fuzzify input variable 'gap': {'nhigh', 'nmild' , 'nlight', ’neutral’, ’plight’, ’pmild’, ’phigh’}
+FUZZIFY gap			
+	TERM nhigh := (-0.5,1) (-0.3,0); 
+	TERM nmild := (-0.5,0) (-0.3,1) (-0.1,0);
+	TERM nlight := (-0.3,0) (-0.1,1) (0,0);
+	TERM neutral := (-0.05,0) (0,1) (0.05,0);
+	TERM plight := (0, 0) (0.1, 1) (0.3,0);
+	TERM pmild := (0.1,0) (0.3,1) (0.5,0);
+	TERM phigh := (0.3, 0) (0.5, 1);
+END_FUZZIFY
+
+
+// Defzzzify output variable intervention: { 'nhigh',’nmild’,’neutral’,’pmild’, 'phigh' }
+DEFUZZIFY intervention			
+	TERM nhigh := (-0.2,1) (-0.1,0);
+	TERM nmild := (-0.1,0) (-0.05,1) (0,0);
+	TERM neutral := (-0.02,0) (0,1) (0.02,0);
+	TERM pmild := (0,0) (0.05,1) (0.1,0);
+	TERM phigh := (0.1,0) (0.2,1);
+
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+// Inference rules
+RULEBLOCK No1
+	AND : MIN;	// Use 'min' for 'and'
+	ACT : MIN;	// Use 'min' activation method
+	ACCU : MAX;	// Use 'max' accumulation method
+
+	RULE 1 : IF gap IS nhigh  THEN intervention IS nhigh;
+	RULE 2 : IF gap IS nmild  THEN intervention IS nmild; 
+	RULE 3 : IF gap IS nlight THEN intervention IS neutral;
+	RULE 4 : IF gap IS neutral THEN intervention IS neutral;
+	RULE 5 : IF gap IS plight THEN intervention IS neutral;
+	RULE 6 : IF gap IS pmild THEN intervention IS pmild;
+	RULE 7 : IF gap IS phigh THEN intervention IS phigh;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
+
+//////////////////////////////////////////////////////////////////////////////////
+FUNCTION_BLOCK subsidy	// Block definition (there may be more than one block per file)
+
+// Define input variables
+VAR_INPUT				
+	gap: REAL;
+END_VAR
+
+// Define output variable
+VAR_OUTPUT				
+	intervention : REAL;
+END_VAR
+
+// Fuzzify input variable 'gap': {’plight’, ’pmild’, ’phigh’}
+FUZZIFY gap			
+	TERM plight := (0, 0) (0.1, 1) (0.3,0);
+	TERM pmild := (0.1,0) (0.3,1) (0.5,0);
+	TERM phigh := (0.3, 0) (0.5, 1);
+END_FUZZIFY
+
+
+// Defzzzify output variable intervention: {’neutral’,’pmild’, 'phigh' }
+DEFUZZIFY intervention			
+	TERM neutral := (0,1) (0.05,0);
+	TERM pmild := (0,0) (0.05,1) (0.1,0);
+	TERM phigh := (0.1,0) (0.2,1);
+
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+// Inference rules
+RULEBLOCK No1
+	AND : MIN;	// Use 'min' for 'and'
+	ACT : MIN;	// Use 'min' activation method
+	ACCU : MAX;	// Use 'max' accumulation method
+
+	RULE 1 : IF gap IS plight THEN intervention IS neutral;
+	RULE 2 : IF gap IS pmild THEN intervention IS pmild;
+	RULE 3 : IF gap IS phigh THEN intervention IS phigh;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
+/////////////////////////////////////////////////////////////////////
+FUNCTION_BLOCK tax	// Block definition (there may be more than one block per file)
+
+// Define input variables
+VAR_INPUT				
+	gap: REAL;
+END_VAR
+
+// Define output variable
+VAR_OUTPUT				
+	intervention : REAL;
+END_VAR
+
+// Fuzzify input variable 'gap': {'nhigh', 'nmild' , 'nlight'}
+FUZZIFY gap			
+	TERM nhigh := (-0.5,1) (-0.3,0); 
+	TERM nmild := (-0.5,0) (-0.3,1) (-0.1,0);
+	TERM nlight := (-0.3,0) (-0.1,1) (0,0);
+END_FUZZIFY
+
+
+// Defzzzify output variable intervention: { 'nhigh',’nmild’,’neutral’}
+DEFUZZIFY intervention			
+	TERM nhigh := (-0.2,1) (-0.1,0);
+	TERM nmild := (-0.1,0) (-0.05,1) (0,0);
+	TERM neutral := (-0.02,0) (0,1) ;
+
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+// Inference rules
+RULEBLOCK No1
+	AND : MIN;	// Use 'min' for 'and'
+	ACT : MIN;	// Use 'min' activation method
+	ACCU : MAX;	// Use 'max' accumulation method
+
+	RULE 1 : IF gap IS nhigh  THEN intervention IS nhigh;
+	RULE 2 : IF gap IS nmild  THEN intervention IS nmild; 
+	RULE 3 : IF gap IS nlight THEN intervention IS neutral;
+	
+END_RULEBLOCK
+END_FUNCTION_BLOCK
+
+

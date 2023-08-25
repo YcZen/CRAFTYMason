@@ -32,28 +32,7 @@ public class CellSet extends HashSet<AbstractCell> implements ModelState {
 		});
 	}
 
-	@Override
-	public void onStartGo() {
-		this.forEach(cell -> {
-			cell.onStartGo();
-		});
 
-	}
-
-	@Override
-	public void go() {
-		this.forEach(cell -> {
-			cell.go();
-		});
-
-	}
-
-	@Override
-	public void onEndGo() {
-		this.forEach(cell -> {
-			cell.onEndGo();
-		});
-	}
 
 	public HashMap<String, AbstractCell> getCellHashMap() {
 		return cellHashMap;

@@ -30,32 +30,6 @@ public class ManagerSet extends HashSet<AbstractManager> implements ModelState {
 	}
 
 	@Override
-	public void onStartGo() {
-		managerList = new ArrayList<>(this);
-		Collections.shuffle(managerList);
-		this.forEach(agent -> {
-			agent.onStartGo();
-		});
-
-	}
-
-	@Override
-	public void go() {
-
-		managerList.forEach(agent -> {
-			agent.go();
-		});
-
-	}
-
-	@Override
-	public void onEndGo() {
-		this.forEach(agent -> {
-			agent.onEndGo();
-		});
-	}
-
-	@Override
 	public boolean addAll(Collection<? extends AbstractManager> c) {
 		// TODO Auto-generated method stub
 		return false;

@@ -1,12 +1,13 @@
-package Insitution;
+package insitution;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import org.antlr.analysis.SemanticContext.AND;
 
-import crafty.DataLoader;
+import crafty.DataCenter;
 import crafty.ModelRunner;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
@@ -15,12 +16,13 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
 
 public class PolicyMaker {
 
-	protected HashMap<String, Policy> policyMap = new HashMap<>();
+	protected HashMap<String, SimplePolicy> policyMap = new HashMap<>();
 	protected double supplyPredicted;
 	protected double learningRate = 1.;
 	protected Integer id = null;
 	FunctionBlock functionBlock ;
 	double initialGuess;
+	int policyLag = 5;
 
 	// 1. Set goals.
 	// 1.1 Using two-points method decompose the targets linearly.
@@ -31,7 +33,7 @@ public class PolicyMaker {
 		for (int i = startYear; i <= endYear; i++) {
 			goalsDoubles.add(slope * (double) i + intercept);
 		}
-		Policy policy = new Policy();
+		SimplePolicy policy = new SimplePolicy();
 		policy.setServiceType(serviceType);
 		policy.setPolicyGoal(endQuantity);
 		policy.setDecomposedGoals(goalsDoubles);
@@ -40,20 +42,20 @@ public class PolicyMaker {
 
 	public void setGoals(ModelRunner modelRunner, int serviceIndex, Double quantity) {
 
-		String serviceType = modelRunner.getState(DataLoader.class).getServiceNameList().get(serviceIndex);
+		String serviceType = modelRunner.getState(DataCenter.class).getServiceNameList().get(serviceIndex);
 		int startYear = 0;
 		int endYear = (int) modelRunner.schedule.getTime();
-		Double startQuantity = modelRunner.getState(DataLoader.class).getInitSupplyMap().get(serviceType);
+		Double startQuantity = modelRunner.getState(DataCenter.class).getInitSupplyMap().get(serviceType);
 		Double endQuantity = quantity * startQuantity;
 		setGoals(serviceType, startYear, endYear, startQuantity, endQuantity);
 		fuzzyPrepare();
 	}
 	
 	public void setFinalGoal(ModelRunner modelRunner, int serviceIndex, double quantity, double initialGuess) {
-		String serviceType = modelRunner.getState(DataLoader.class).getServiceNameList().get(serviceIndex);
+		String serviceType = modelRunner.getState(DataCenter.class).getServiceNameList().get(serviceIndex);
 		int startYear = 0;
 		int endYear = modelRunner.totalTicks;
-		Double startQuantity = quantity * modelRunner.getState(DataLoader.class).getInitSupplyMap().get(serviceType);
+		Double startQuantity = quantity * modelRunner.getState(DataCenter.class).getInitSupplyMap().get(serviceType);
 		Double endQuantity = startQuantity;
 		setGoals(serviceType, startYear, endYear, startQuantity, endQuantity);
 		fuzzyPrepare();
@@ -73,22 +75,26 @@ public class PolicyMaker {
 	// 3. Evaluate historic policy effectiveness.
 	// 4. Adjust policy intervention coefficient.
 	public void updatePolicyModifier(String service, List<Double> historicalSupply, double predictedSupply) {
-		Policy policy = policyMap.get(service);
+		SimplePolicy policy = policyMap.get(service);
 		double interventionModifier = policy.getIntervModifier();
-		int recentTicks = 5;
-		if (historicalSupply.size() >= recentTicks & historicalSupply.size()%5==0) {
-			int start = historicalSupply.size() - recentTicks;
+	//	policyLag = 5;
+		if (historicalSupply.size() >= policyLag & historicalSupply.size()%5==0) {
+			int start = historicalSupply.size() - policyLag;
 			int end = historicalSupply.size();
 			List<Double> recentSupply = historicalSupply.subList(start, end);
-//			recentSupply.add(predictedSupply);
-//			end = end + 1;
-			List<Double> recentGoals = policy.getDecomposedGoals().subList(start, end);
-
+			List<Double> recentGoals;
+			if(end <= policy.getDecomposedGoals().size()) {
+				recentGoals = policy.getDecomposedGoals().subList(start, end);
+			}else {
+				double finalGoal = policy.getDecomposedGoals().get(policy.getDecomposedGoals().size()-1);
+				recentGoals = new ArrayList<>(Collections.nCopies(policyLag, finalGoal));
+			}
+			 
 			double averageGap = 0;
-			for (int i = 0; i < recentTicks; i++) {
+			for (int i = 0; i < policyLag; i++) {
 				averageGap = averageGap + (recentGoals.get(i) - recentSupply.get(i)) / recentGoals.get(i);
 			}
-			averageGap = averageGap / recentTicks;
+			averageGap = averageGap / policyLag;
 	//		policy.setIntervModifier((0 + averageGap * this.learningRate) + interventionModifier);
 			functionBlock.setVariable("gap", averageGap);
 			functionBlock.evaluate();
@@ -110,7 +116,7 @@ public class PolicyMaker {
 
 	// 6. Make policy
 	public Double makePolicy(String service, int ticks, double predictedAnualDemand, double predictedSupply) {
-		Policy policy = policyMap.get(service);
+		SimplePolicy policy = policyMap.get(service);
 		// making policy for next tick, so the goal should be the goal in next tick.
 //		double intervention = (policy.getIntervModifier() * policy.getDecomposedGoals().get(ticks + 1)
 //				- predictedAnualDemand) / predictedSupply;//
@@ -157,7 +163,7 @@ public class PolicyMaker {
 		return id;
 	}
 
-	public HashMap<String, Policy> getPolicyMap() {
+	public HashMap<String, SimplePolicy> getPolicyMap() {
 		return policyMap;
 	}
 	
@@ -176,7 +182,7 @@ public class PolicyMaker {
 		functionBlock = fis.getFunctionBlock("policy");
 
 		// Show
-		JFuzzyChart.get().chart(functionBlock);
+	//	JFuzzyChart.get().chart(functionBlock);
 
 //		// Set inputs
 //		functionBlock.setVariable("gap", -0.0);
@@ -186,7 +192,7 @@ public class PolicyMaker {
 
 		// Show output variable's chart
 		Variable interven = functionBlock.getVariable("intervention");
-		JFuzzyChart.get().chart(interven, interven.getDefuzzifier(), true);
+	//	JFuzzyChart.get().chart(interven, interven.getDefuzzifier(), true);
 	}
 
 	public double getInitialGuess() {
@@ -195,5 +201,13 @@ public class PolicyMaker {
 
 	public void setInitialGuess(double initialGuess) {
 		this.initialGuess = initialGuess;
+	}
+
+	public int getPolicyLag() {
+		return policyLag;
+	}
+
+	public void setPolicyLag(int policyLag) {
+		this.policyLag = policyLag;
 	}
 }

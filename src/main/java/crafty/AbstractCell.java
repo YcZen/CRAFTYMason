@@ -75,7 +75,7 @@ public abstract class AbstractCell implements ModelState {
 		return productionFilter;
 	}
 
-	public void initializeProductionFilter(DataLoader dataLoader) {
+	public void initializeProductionFilter(DataCenter dataLoader) {
 		// TODO Auto-generated method stub
 		
 	}
