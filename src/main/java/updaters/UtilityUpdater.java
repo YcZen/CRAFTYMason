@@ -3,9 +3,10 @@ package updaters;
 import java.util.HashMap;
 
 import crafty.DataCenter;
-import crafty.ModelRunner;
 import crafty.ModelState;
 import insitution.AbstractInstitution;
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 
@@ -14,13 +15,13 @@ public class UtilityUpdater extends AbstractUpdater{
 	@Override
 	public void step(SimState arg0) {
 		modelRunner.getState(DataCenter.class).updateUtility();
-		System.out.println("running");
+	//	System.out.println("running");
 		
 		
 	}
 
 	@Override
-	public void setup(ModelRunner modelRunner) {
+	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
 		
 	}

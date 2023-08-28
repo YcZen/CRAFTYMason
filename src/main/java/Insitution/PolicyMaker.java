@@ -8,7 +8,7 @@ import java.util.List;
 import org.antlr.analysis.SemanticContext.AND;
 
 import crafty.DataCenter;
-import crafty.ModelRunner;
+import modelRunner.ModelRunner;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import net.sourceforge.jFuzzyLogic.plot.JFuzzyChart;

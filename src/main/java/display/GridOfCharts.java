@@ -10,8 +10,9 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import crafty.DataCenter;
-import crafty.ModelRunner;
 import crafty.ModelState;
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
 import net.sourceforge.jFuzzyLogic.fcl.FclParser.declaration_return;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -29,7 +30,7 @@ public class GridOfCharts implements ModelState,Steppable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-    ModelRunner modelRunner;
+    AbstractModelRunner modelRunner;
     public JFrame frame;
     private HashMap<String, XYSeries> totalProductionSeries = new HashMap<String, XYSeries>();
     private HashMap<String, XYSeries> totalDemandSeries = new HashMap<String, XYSeries>();
@@ -106,7 +107,7 @@ public class GridOfCharts implements ModelState,Steppable {
 	}
 
 	@Override
-	public void setup(ModelRunner modelRunner) {
+	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
 		totalProductionSeries.clear();
 		totalDemandSeries.clear();

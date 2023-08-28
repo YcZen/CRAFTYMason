@@ -11,7 +11,7 @@ public class TestTipper2 {
 
 	public static void main(String[] args) {
 		// Load from 'FCL' file
-		String fileName = "resources/fcl/tipper.fcl";
+		String fileName = "resources/fcl/fuzzyPolicy.fcl";
 		FIS fis = FIS.load(fileName, true);
 
 		// Error while loading?
@@ -47,13 +47,13 @@ public class TestTipper2 {
 		
 // -----------------------------------------------	
 		// Get default function block
-		FunctionBlock functionBlock = fis.getFunctionBlock("policy");
+		FunctionBlock functionBlock = fis.getFunctionBlock("tax");
 
 		// Show
 		JFuzzyChart.get().chart(functionBlock);
 
 		// Set inputs
-		functionBlock.setVariable("gap", -0.25);
+		functionBlock.setVariable("gap", 10);
 
 		// Evaluate
 		functionBlock.evaluate();

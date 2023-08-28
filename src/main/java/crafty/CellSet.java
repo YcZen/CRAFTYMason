@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
+
 public class CellSet extends HashSet<AbstractCell> implements ModelState {
 
 	private HashMap<String, AbstractCell> cellHashMap = new HashMap<>();
@@ -26,7 +29,7 @@ public class CellSet extends HashSet<AbstractCell> implements ModelState {
 	}
 
 	@Override
-	public void setup(ModelRunner modelRunner) {
+	public void setup(AbstractModelRunner modelRunner) {
 		this.forEach(cell -> {
 			cell.setup(modelRunner);
 		});

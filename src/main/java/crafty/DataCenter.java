@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.swing.JOptionPane;
 
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import tech.tablesaw.api.Row;
@@ -42,10 +44,11 @@ public class DataCenter implements ModelState{//, Steppable{
 	private HashMap<String, Double> utitlityMap = new HashMap<>();
 	HashMap<String, List<Double>> strategy = null;
 	HashMap<String, Double> currentStrategy = new HashMap<>();
-	ModelRunner modelRunner;
+	AbstractModelRunner modelRunner;
 	private int mapWidth = 0;
 	private int mapHeight = 0;
 	private Map<String, Double> initSupplyMap = new HashMap<>();
+	public HashMap<String, Integer> AFTCounter = new HashMap<String, Integer>();
 	int time = 0;
 
 	private String agentDataDirectory, cellDataPath, anualCapitalFilePath, anualDemandFile;
@@ -75,7 +78,7 @@ public class DataCenter implements ModelState{//, Steppable{
 	}
 
 	@Override
-	public void setup(ModelRunner modelRunner) {
+	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
 		prepareSerivceNames(serviceNameFile);
 		prepareCapitalNames(capitalNameFile);
@@ -91,7 +94,7 @@ public class DataCenter implements ModelState{//, Steppable{
 		this.anualCapitalFileIterator = Arrays.stream(anualCapitalFileDir.listFiles()).iterator();
 		loadAnualDemandDataToIterator(anualDemandFile);
 		
-		System.out.println("==========" + utitlityMap + "===========");
+		System.out.println(AFTCounter.keySet());
 	}
 
 
@@ -135,6 +138,7 @@ public class DataCenter implements ModelState{//, Steppable{
 			manager.setSensitivityTable(agentTable);
 			manager.setRepresentative(true);
 			agentTypeMap.put(agentTable.name(), manager);
+			AFTCounter.put(agentTable.name(),0);
 			managerSet.add(manager);
 
 			// Convert table into hashmap for improving calculation performance.
@@ -177,6 +181,7 @@ public class DataCenter implements ModelState{//, Steppable{
 			mapWidth = Math.max(mapWidth, x);// this variable is for map visualization
 			mapHeight = Math.max(mapHeight, y);// this variable is for map visualization
 			manager.setId(i);
+			AFTCounter.put(managerTypeString, AFTCounter.get(managerTypeString)+1);
 		}
 	}
 

@@ -4,12 +4,15 @@ package crafty;
 import java.util.HashMap;
 import java.util.Set;
 
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
+
 public class LandCell extends AbstractCell {
 // Super class variables;
 // protected Row cellData;
 // protected Table ownerServiceTable;
 // protected Manager owner;
-	protected ModelRunner modelRunner;
+	protected AbstractModelRunner modelRunner;
 	public Manager getOwner() {
 		return owner;
 	}
@@ -19,7 +22,7 @@ public class LandCell extends AbstractCell {
 	}
 
 	@Override
-	public void setup(ModelRunner modelRunner) {
+	public void setup(AbstractModelRunner modelRunner) {
 //		initializeCapitalFilter();
 //		initializeProductionFilter();
 		this.modelRunner = modelRunner;

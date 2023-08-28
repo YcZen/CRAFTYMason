@@ -12,15 +12,16 @@ import crafty.AbstractCell;
 import crafty.CellSet;
 import crafty.DataCenter;
 import crafty.LandCell;
-import crafty.ModelRunner;
 import crafty.ModelState;
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
 
 public class ProtectionMaker implements ModelState {
 
 	double collectIntervention = 0;
 	double collectGoal;
 	double collectUnprotectedProportion;
-	ModelRunner modelRunner;
+	AbstractModelRunner modelRunner;
 	HashSet<AbstractCell> unProtectedSet = new HashSet<>();
 	protected HashMap<String, SimplePolicy> policyMap = new HashMap<>();
 	protected double supplyPredicted;
@@ -219,7 +220,7 @@ public class ProtectionMaker implements ModelState {
 	}
 
 	@Override
-	public void setup(ModelRunner modelRunner) {
+	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
 
 	}
@@ -227,7 +228,7 @@ public class ProtectionMaker implements ModelState {
 	
 	public void onStartGo() {
 		if (modelRunner.schedule.getTime() == 0) {
-			setGoals(modelRunner, 2, 2.0);
+		//	setGoals(modelRunner, 2, 2.0);
 		}
 		makePolicy(serviceType);
 		setProtectedAreas(serviceType);
@@ -242,9 +243,9 @@ public class ProtectionMaker implements ModelState {
 
 	
 	public void onEndGo() {
-		updateCollectedData();
-		updatePolicyModifier(serviceType,
-				modelRunner.getState(PolicyMakerSet.class).getSupplyHistoryMap().get(serviceType));
+//		updateCollectedData();
+//		updatePolicyModifier(serviceType,
+//				modelRunner.getState(PolicyMakerSet.class).getSupplyHistoryMap().get(serviceType));
 	}
 
 	public void updateCollectedData() {

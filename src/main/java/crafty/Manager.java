@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
 import tech.tablesaw.api.Table;
 
 public class Manager extends AbstractManager {
@@ -37,7 +39,7 @@ public class Manager extends AbstractManager {
 	}
 
 	@Override
-	public void setup(ModelRunner modelRunner) {
+	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
 		
 		managerProduce(); // manager should produce once to let the model calculate
@@ -177,19 +179,24 @@ public class Manager extends AbstractManager {
 																									// one-owner-many-lands
 																									// code
 					if (myCompetitiveness > otherCompetitiveness & new Random().nextDouble() <  modelRunner.getThreshold()) {
-						// 1.the previous owner remove this cell from its landSet
+						
+						HashMap<String, Integer> AFTCounter = modelRunner.getState(DataCenter.class).AFTCounter;
+						// 1.the previous owner remove this cell from its landSet and the AFTCounter subtract 1 correspondingly.
 						landCell.getOwner().getLandSet().remove(landCell);
+						AFTCounter.put(landCell.getOwner().getManagerType(), AFTCounter.get(landCell.getOwner().getManagerType())-1);
 						// 1.5 if the previous owner is not representative and has not land, then remove
 						// it from ManagerSet.
 						if (landCell.getOwner().isRepresentative() != true
 								&& landCell.getOwner().getLandSet().size() == 0) {
 							modelRunner.getState(DataCenter.class).getManagerSet().remove(landCell.getOwner());
 						}
-						// 2.this landCell set the owner to this new manager
+						// 2.this landCell set the owner to this new manager, and the AFTCounter plus 1 correspondingly.
 						Manager newOwnerManager = this.clone();
 						newOwnerManager.mutate(0.0, 0.1);
 						modelRunner.getState(DataCenter.class).getManagerSet().add(newOwnerManager);
 						landCell.setOwner(newOwnerManager);
+						
+						AFTCounter.put(landCell.getOwner().getManagerType(), AFTCounter.get(landCell.getOwner().getManagerType())+1);
 						// 3.this new manager add this landCell to its landSet
 						landCell.getOwner().getLandSet().add(landCell);
 						// 4.this landCell update its service production according to the new owner
@@ -197,7 +204,8 @@ public class Manager extends AbstractManager {
 								newOwnerManager, modelRunner.getState(DataCenter.class));
 						landCell.setServiceProductionMap(newSerivceMapHere);
 						landCell.getOwner().setServiceProductionMap(newSerivceMapHere);
-
+						
+						
 					}
 				}
 			}

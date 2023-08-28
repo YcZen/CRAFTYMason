@@ -3,7 +3,8 @@ package insitution;
 import java.util.List;
 
 import crafty.DataCenter;
-import crafty.ModelRunner;
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import net.sourceforge.jFuzzyLogic.plot.JFuzzyChart;
@@ -16,7 +17,7 @@ public class NatureInstitution extends AbstractInstitution {
 	private InformCollector demandCollector;
 	FunctionBlock functionBlock ;
 	@Override
-	public void setup(ModelRunner modelRunner) {
+	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
 		
 	}

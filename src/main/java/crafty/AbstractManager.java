@@ -5,13 +5,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import tech.tablesaw.api.Table;
 import updaters.AbstractUpdater;
 
 public abstract class AbstractManager extends AbstractUpdater {
-	protected ModelRunner modelRunner;
+	protected AbstractModelRunner modelRunner;
 	protected String managerType;
 	protected int id;
 	protected double competitiveness;
@@ -38,7 +40,7 @@ public abstract class AbstractManager extends AbstractUpdater {
 	}
 
 	@Override
-	public void setup(ModelRunner modelRunner) {
+	public void setup(AbstractModelRunner modelRunner) {
 
 	}
 

@@ -5,8 +5,9 @@ import java.util.Set;
 
 import crafty.CellSet;
 import crafty.DataCenter;
-import crafty.ModelRunner;
 import crafty.ModelState;
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.grid.IntGrid2D;
@@ -19,7 +20,7 @@ public class MapUpdater extends AbstractUpdater{
 	CellSet cellSet;
 
 	@Override
-	public void setup(ModelRunner modelRunner) {
+	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
 		this.landMap = modelRunner.landMap;
 		this.cellSet = modelRunner.getState(CellSet.class);

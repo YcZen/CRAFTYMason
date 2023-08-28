@@ -2,18 +2,20 @@ package insitution;
 
 import java.util.HashMap;
 
-import crafty.ModelRunner;
 import crafty.ModelState;
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
 import sim.engine.Steppable;
 import updaters.AbstractUpdater;
 
 public abstract class AbstractInstitution extends AbstractUpdater {
 	
-	String name;
-	double uncertainties;
-	double totalBugdet;
-	HashMap<String, Policy> policyMap = new HashMap<String, Policy>();
-	ModelRunner modelRunner;
+	private static final long serialVersionUID = 1L;
+	protected String name;
+	protected double uncertainties;
+	protected double totalBugdet;
+	protected HashMap<String, Policy> policyMap = new HashMap<String, Policy>();
+	protected AbstractModelRunner modelRunner;
 	
 	protected abstract void initialize();
 	protected abstract void collectInformation();

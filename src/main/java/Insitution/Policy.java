@@ -16,7 +16,7 @@ public class Policy {
     int policyLag = 5;
     double intervention = 0;
     boolean startChanging = false;
-    private List<Double> policyHistory = new ArrayList();
+    private List<Double> policyHistory = new ArrayList<Double>();
 
     private Policy(Builder builder) {
         this.policyName = builder.policyName;

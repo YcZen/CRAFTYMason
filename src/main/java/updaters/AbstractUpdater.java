@@ -1,9 +1,9 @@
 package updaters;
 
-import crafty.ModelRunner;
 import crafty.ModelState;
+import modelRunner.AbstractModelRunner;
 import sim.engine.Steppable;
 
 public abstract class AbstractUpdater implements ModelState, Steppable{
-	protected ModelRunner modelRunner;
+	protected AbstractModelRunner modelRunner;
 }

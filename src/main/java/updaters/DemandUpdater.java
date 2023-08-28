@@ -3,8 +3,9 @@ package updaters;
 import java.util.HashMap;
 
 import crafty.DataCenter;
-import crafty.ModelRunner;
 import crafty.ModelState;
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 
@@ -17,7 +18,7 @@ public class DemandUpdater extends AbstractUpdater{
 	}
 
 	@Override
-	public void setup(ModelRunner modelRunner) {
+	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
 		
 	}

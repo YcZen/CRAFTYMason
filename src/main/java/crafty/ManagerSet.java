@@ -7,6 +7,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
+
 public class ManagerSet extends HashSet<AbstractManager> implements ModelState {
 	List<AbstractManager> managerList;
 
@@ -21,7 +24,7 @@ public class ManagerSet extends HashSet<AbstractManager> implements ModelState {
 	}
 
 	@Override
-	public void setup(ModelRunner modelRunner) {
+	public void setup(AbstractModelRunner modelRunner) {
 		managerList = new ArrayList<>(this);
 		Collections.shuffle(managerList);
 		this.forEach(agent -> {

@@ -3,7 +3,7 @@ package crafty;
 
 import java.util.HashMap;
 
-import insitution.PolicyMakerSet;
+import modelRunner.AbstractModelRunner;
 import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.Table;
 
@@ -72,19 +72,10 @@ public class Methods {
 	}
 
 	public static double calculateCompetitivness(HashMap<String, Double> productionHashMap,
-			HashMap<String, Double> utilityhaHashMap, ModelRunner modelRunner) {
+			HashMap<String, Double> utilityhaHashMap, AbstractModelRunner modelRunner) {
 		double competitivness = 0;
-		for (String serviceName : productionHashMap.keySet()) {
-			double intervention = 0;
-			if (modelRunner.getState(PolicyMakerSet.class) != null) {
-				intervention = modelRunner.getState(PolicyMakerSet.class).getInterventionMap().get(serviceName);
-			}
-			competitivness += // 1 /
-								// (modelRunner.getState(DataLoader.class).getGlobalProductionMap().get(serviceName))
-								// *
-					productionHashMap.get(serviceName) * (utilityhaHashMap.get(serviceName) + intervention)
-							* modelRunner.getState(DataCenter.class).getCurrentStrategy().get(serviceName);
-						//	* modelRunner.getState(TechnologySet.class).getTechnology(serviceName).getState();
+		for (String serviceName : productionHashMap.keySet()) {			
+			competitivness += productionHashMap.get(serviceName) * utilityhaHashMap.get(serviceName) ;
 		}
 		return competitivness;
 	}

@@ -5,7 +5,9 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 
 import crafty.DataCenter;
-import crafty.ModelRunner;
+import experiment1.ExperimentModelRunner1;
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
 import sim.display.Console;
 import sim.display.Controller;
 import sim.display.Display2D;
@@ -24,8 +26,8 @@ public class ModelRunnerWithUI extends GUIState{
 	Inspector dataInspector;
 	
 	public ModelRunnerWithUI() {
-
-		super(new ModelRunner(System.currentTimeMillis())); 
+		//super(new ModelRunner(System.currentTimeMillis())); 
+		super(new ExperimentModelRunner1(System.currentTimeMillis())); 
 	}
 	
 	public ModelRunnerWithUI(SimState state) {
@@ -61,21 +63,20 @@ public class ModelRunnerWithUI extends GUIState{
 	public void start()
 	{
 		super.start();
-		setupPortrayals();
+	//	setupPortrayals();
 	}
 	
 	public void load(SimState state)
 	{
 		super.load(state);
-		setupPortrayals();
+	//	setupPortrayals();
 		
 	}
 	
 	public void setupPortrayals() {
-		int AFTnumber = ((ModelRunner) state).getState(DataCenter.class).getAgentTypeMap().size();
+		int AFTnumber = ((AbstractModelRunner) state).getState(DataCenter.class).getAgentTypeMap().size();
 		grid2D.setMap(new SimpleColorMap(generateDistinctColors(AFTnumber+1)));
-		grid2D.setField(((ModelRunner) state).landMap);
-		
+		grid2D.setField(((AbstractModelRunner) state).landMap);
 		display.reset();
 		display.setBackdrop(Color.white);
 		display.repaint();
@@ -109,8 +110,8 @@ public class ModelRunnerWithUI extends GUIState{
 	
 	public static Object getInfo()
 	{
-	try { return new java.net.URL("https://landchange.imk-ifu.kit.edu/CRAFTY"); }
-	catch (java.net.MalformedURLException e) { return "Oops"; }
+		try { return new java.net.URL("https://landchange.imk-ifu.kit.edu/CRAFTY"); }
+		catch (java.net.MalformedURLException e) { return "Oops"; }
 	}
 	
 	

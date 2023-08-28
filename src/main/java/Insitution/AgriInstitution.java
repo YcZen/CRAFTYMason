@@ -2,7 +2,9 @@ package insitution;
 
 import java.util.List;
 import crafty.DataCenter;
-import crafty.ModelRunner;
+import experiment1.ExperimentModelRunner1;
+import modelRunner.AbstractModelRunner;
+import modelRunner.ModelRunner;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import net.sourceforge.jFuzzyLogic.plot.JFuzzyChart;
@@ -16,6 +18,7 @@ public class AgriInstitution extends AbstractInstitution{
 	FunctionBlock functionBlock;
 	private FunctionBlock fuzzyTax;
 	private FunctionBlock fuzzySubsidy;
+	private FunctionBlock fuzzyECO;
 	
 	
 	@Override
@@ -24,19 +27,22 @@ public class AgriInstitution extends AbstractInstitution{
 		fuzzyPrepare();
 		Policy policy = new Policy.Builder()
 								.policyName("decrease meat")
-								.type(PolicyType.TAX)
-								.goal(1.0 * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Meat"))
+								//.type(PolicyType.TAX)
+								.type(PolicyType.ECO)
+								.goal(((ExperimentModelRunner1)modelRunner).getGoal() * modelRunner.getState(DataCenter.class).getInitSupplyMap().get("Meat"))
+							//	.goal(5 * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Meat"))
 								.initialGuess(1000000.)
 								.inertia(0.2)
 								.policyLag(5)
 								.targetService("Meat")
 								.build();		
-		this.register(policy);
+	//	this.register(policy);
 		
 		policy = new Policy.Builder()
 							.policyName("increase crop")
-							.type(PolicyType.SUBSIDY)
-							.goal(6.0 * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Crops"))
+							//.type(PolicyType.SUBSIDY)
+							.type(PolicyType.ECO)
+							.goal(((ExperimentModelRunner1)modelRunner).getGoal() * modelRunner.getState(DataCenter.class).getInitSupplyMap().get("Crops"))
 							.initialGuess(1000000.)
 							.inertia(0.2)
 							.policyLag(5)
@@ -97,6 +103,9 @@ public class AgriInstitution extends AbstractInstitution{
 				if(policy.getType()==PolicyType.SUBSIDY) {
 					functionBlock = fuzzySubsidy;
 				}
+				if(policy.getType()==PolicyType.ECO) {
+					functionBlock = fuzzyECO;
+				}
 				double interventionModifier = policy.getInterventionModifier();
 				functionBlock.setVariable("gap", policy.getEvluation());
 				functionBlock.evaluate();
@@ -117,8 +126,10 @@ public class AgriInstitution extends AbstractInstitution{
 		 */
 	//	totalBugdet = 0;
 		policyMap.values().forEach(policy -> {
-			if(policy.getType()==PolicyType.TAX && !policy.getHistory().isEmpty()) {
-				totalBugdet += Math.abs(policy.getLatestHistory());
+			if((policy.getType()==PolicyType.ECO || policy.getType()==PolicyType.TAX) && !policy.getHistory().isEmpty()) {
+				if(policy.getLatestHistory()<0) { // this is to ensure the economic policy is taxing the farmers
+					totalBugdet += Math.abs(policy.getLatestHistory());
+				}
 			}
 		});
 		
@@ -136,7 +147,7 @@ public class AgriInstitution extends AbstractInstitution{
 		 * Every year the resources should be reallocated. Should consider priority later.
 		 */
 		policyMap.values().forEach(policy -> {
-			if(policy.getType()==PolicyType.SUBSIDY) {
+			if(policy.getType()==PolicyType.SUBSIDY || (policy.getType()==PolicyType.ECO && policy.getIntervention()>0)) {
 				double intervention = policy.getIntervention();
 				intervention = (intervention < totalBugdet)? intervention : totalBugdet;
 				policy.setIntervention(intervention);
@@ -149,7 +160,7 @@ public class AgriInstitution extends AbstractInstitution{
 	@Override
 	public void implementPolicy() {
 		policyMap.values().forEach(policy -> {
-			if(policy.getType()==PolicyType.TAX || policy.getType() == PolicyType.SUBSIDY) {
+			if(policy.getType()==PolicyType.TAX || policy.getType() == PolicyType.SUBSIDY || policy.getType()==PolicyType.ECO) {
 				double utility = modelRunner.getState(DataCenter.class).getUtitlityMap().get(policy.getTargetService());
 				utility = utility + policy.getIntervention();
 				modelRunner.getState(DataCenter.class).getUtitlityMap().put(policy.getTargetService(), utility);
@@ -182,13 +193,15 @@ public class AgriInstitution extends AbstractInstitution{
 		// Get policy function block
 		fuzzyTax = fis.getFunctionBlock("tax");
 		fuzzySubsidy = fis.getFunctionBlock("subsidy");
+		fuzzyECO = fis.getFunctionBlock("policy");
 		// Show
 	//	JFuzzyChart.get().chart(fuzzyTax);
 	//	JFuzzyChart.get().chart(fuzzySubsidy);
+	//	JFuzzyChart.get().chart(fuzzyECO);
 	}
 
 	@Override
-	public void setup(ModelRunner modelRunner) {
+	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
 		
 		
@@ -212,7 +225,7 @@ public class AgriInstitution extends AbstractInstitution{
 		policyEvaluation();
 		policyAdaptation();
 		budgetUpdate();
-		resourceAllocation();
+//		resourceAllocation();
 	//	implementPolicy();  // this method is exectued in utilityUpdater
 		updatePolicyHistory();
 	}
