@@ -47,13 +47,13 @@ public class TestTipper2 {
 		
 // -----------------------------------------------	
 		// Get default function block
-		FunctionBlock functionBlock = fis.getFunctionBlock("tax");
+		FunctionBlock functionBlock = fis.getFunctionBlock("protection");
 
 		// Show
 		JFuzzyChart.get().chart(functionBlock);
 
 		// Set inputs
-		functionBlock.setVariable("gap", 10);
+		functionBlock.setVariable("gap", 0);
 
 		// Evaluate
 		functionBlock.evaluate();

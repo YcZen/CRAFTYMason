@@ -9,6 +9,7 @@ import java.util.List;
 public class InformCollector {
 	
 	private HashMap<String, List<Double>> informationMap = new HashMap<String, List<Double>>();
+
 		
 	public InformCollector(String ... serivce) {
 		for(String serv : serivce) {

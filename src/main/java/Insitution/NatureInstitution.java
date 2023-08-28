@@ -1,10 +1,16 @@
 package insitution;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
+import crafty.AbstractCell;
+import crafty.CellSet;
 import crafty.DataCenter;
+import crafty.LandCell;
+import experiment1.ExperimentModelRunner2;
 import modelRunner.AbstractModelRunner;
-import modelRunner.ModelRunner;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import net.sourceforge.jFuzzyLogic.plot.JFuzzyChart;
@@ -16,22 +22,40 @@ public class NatureInstitution extends AbstractInstitution {
 	private InformCollector supplyCollector;
 	private InformCollector demandCollector;
 	FunctionBlock functionBlock ;
+	private FunctionBlock fuzzyTax;
+	private FunctionBlock fuzzySubsidy;
+	private FunctionBlock fuzzyECO;
+	private FunctionBlock fuzzyProect;
+	HashSet<AbstractCell> unProtectedSet = new HashSet<>();
+	
 	@Override
 	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
 		
+		
 	}
+
 
 	@Override
 	public void toSchedule() {
-
-		
+		modelRunner.schedule.scheduleRepeating(0, modelRunner.indexOf(this), this, 1.0);
 	}
 
 	@Override
 	public void step(SimState arg0) {
-
+	//	System.out.println("Institution step");
+		if(modelRunner.schedule.getTime()==0) {
+			initialize();
+		}
 		
+		collectInformation();
+		predict();
+		policyEvaluation();
+		policyAdaptation();
+		budgetUpdate();
+//		resourceAllocation();
+	//	implementPolicy();  // this method is exectued in utilityUpdater
+		updatePolicyHistory();
 	}
 
 	@Override
@@ -39,28 +63,34 @@ public class NatureInstitution extends AbstractInstitution {
 		fuzzyPrepare();
 		Policy policy = new Policy.Builder()
 				.policyName("subsidy to increase diversity")
-				.type(PolicyType.SUBSIDY)
-				.goal(1.0 * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Diversity"))
+				.type(PolicyType.ECO)
+				.goal(((ExperimentModelRunner2)modelRunner).getGoal() * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Diversity"))
 				.initialGuess(10000.)
-				.inertia(0.1)
+				.inertia(0.2)
 				.policyLag(5)
 				.targetService("Diversity")
 				.build();		
-		this.register(policy);
+	//	this.register(policy);
 		
 		policy = new Policy.Builder()
 				.policyName("Protected areas")
 				.type(PolicyType.PROTECTION)
-				.goal(1.0 * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Diversity"))
+				.goal(2 * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Diversity"))
 				.initialGuess(10000.)
-				.inertia(0.1)
-				.policyLag(5)
+				.inertia(0.2)
+				.policyLag(1)
 				.targetService("Diversity")
 				.build();		
 		this.register(policy);
 		
 		demandCollector = new InformCollector("Diversity");
 		supplyCollector = new InformCollector("Diversity");
+		
+		modelRunner.getState(CellSet.class).forEach(cell -> {
+			if (cell.isProtected() == false) {
+				unProtectedSet.add(cell);
+			}
+		});
 		
 	}
 
@@ -103,47 +133,96 @@ public class NatureInstitution extends AbstractInstitution {
 	}
 
 	@Override
-	protected void policyAdaptation() {
+	public void policyAdaptation() {
 		policyMap.values().forEach(policy -> {
 			if(policy.isStartChanging()) {
+				if(policy.getType()==PolicyType.TAX) {
+					functionBlock = fuzzyTax;
+				}
+				if(policy.getType()==PolicyType.SUBSIDY) {
+					functionBlock = fuzzySubsidy;
+				}
+				if(policy.getType()==PolicyType.ECO) {
+					functionBlock = fuzzyECO;
+				}
+				if(policy.getType()==PolicyType.PROTECTION) {
+					functionBlock = fuzzyProect;
+				}
 				double interventionModifier = policy.getInterventionModifier();
 				functionBlock.setVariable("gap", policy.getEvluation());
 				functionBlock.evaluate();
-				policy.setInterventionModifier(functionBlock.getVariable("intervention").getValue() + interventionModifier);
+				double incrementalIntervention = (policy.getInertia()<functionBlock.getVariable("intervention").getValue())? policy.getInertia(): functionBlock.getVariable("intervention").getValue();
+				policy.setInterventionModifier(incrementalIntervention + interventionModifier);
+				policy.updateIntervention();
 				System.out.println("average gap: " + policy.getEvluation() + "; intervention: " + functionBlock.getVariable("intervention").getValue());
 			}
 		});
-		
 	}
 	
 	@Override
 	protected void budgetUpdate() {
-		// TODO Auto-generated method stub
+		/*
+		 * The budget should be updated every year. Budget comes from two ways: 
+		 * a proportion of the total agricultural GDP (reflecting the individual income tax),
+		 * plus extra taxes imposed by this institution (reflecting the cross-subsidization)
+		 */
+	//	totalBugdet = 0;
+		policyMap.values().forEach(policy -> {
+			if((policy.getType()==PolicyType.ECO || policy.getType()==PolicyType.TAX) && !policy.getHistory().isEmpty()) {
+				if(policy.getLatestHistory()<0) { // this is to ensure the economic policy is taxing the farmers
+					totalBugdet += Math.abs(policy.getLatestHistory());
+				}
+			}
+		});
+		
+		String[] agriProductionList = {"Diversity"};
+		double proportion = 0.;
+		for(String production : agriProductionList) {
+			totalBugdet += (proportion * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get(production));
+		}
 		
 	}
 
 	@Override
-	protected void resourceAllocation() {
-		
+	public void resourceAllocation() {
+		/*
+		 * Every year the resources should be reallocated. Should consider priority later.
+		 */
+		policyMap.values().forEach(policy -> {
+			if(policy.getType()==PolicyType.SUBSIDY || (policy.getType()==PolicyType.ECO && policy.getIntervention()>0)) {
+				double intervention = policy.getIntervention();
+				intervention = (intervention < totalBugdet)? intervention : totalBugdet;
+				policy.setIntervention(intervention);
+				totalBugdet += -intervention;
+			}
+		});
 		
 	}
 
 	@Override
 	public void implementPolicy() {
-
-		
+		policyMap.values().forEach(policy -> {
+			if(policy.getType()==PolicyType.TAX || policy.getType() == PolicyType.SUBSIDY || policy.getType()==PolicyType.ECO) {
+				double utility = modelRunner.getState(DataCenter.class).getUtitlityMap().get(policy.getTargetService());
+				utility = utility + policy.getIntervention();
+				modelRunner.getState(DataCenter.class).getUtitlityMap().put(policy.getTargetService(), utility);
+			}
+		});
+		setProtectedAreas();
 	}
 	
 	@Override
 	public void updatePolicyHistory() {
-		// TODO Auto-generated method stub
+		policyMap.values().forEach(policy -> {
+			policy.updatePolicyHistory();
+		});
 		
 	}
 
 	@Override
-	protected void fuzzyPrepare() {
+	public void fuzzyPrepare() {
 		// Load from 'FCL' file
-		String fileName = "resources/fcl/tipper.fcl";
+		String fileName = "resources/fcl/fuzzyPolicy.fcl";
 		FIS fis = FIS.load(fileName, true);
 		
 		// Error while loading?
@@ -153,11 +232,66 @@ public class NatureInstitution extends AbstractInstitution {
 		}
 		
 		// Get policy function block
-		functionBlock = fis.getFunctionBlock("policy");
-
+		fuzzyTax = fis.getFunctionBlock("tax");
+		fuzzySubsidy = fis.getFunctionBlock("subsidy");
+		fuzzyECO = fis.getFunctionBlock("policy");
+		fuzzyProect = fis.getFunctionBlock("protection");
 		// Show
-		JFuzzyChart.get().chart(functionBlock);
+	//	JFuzzyChart.get().chart(fuzzyTax);
+	//	JFuzzyChart.get().chart(fuzzySubsidy);
+	//	JFuzzyChart.get().chart(fuzzyECO);
+	}
+	
+	public void setProtectedAreas() {
+		policyMap.values().forEach(policy -> {
+			if(policy.getType()==PolicyType.PROTECTION && policy.isStartChanging()==true) {
+				double intervention = policy.getIntervention();
+				int n = (int) intervention;
+		//		int n = (int) (unProtectedSet.size() * intervention); 
+		//		int n = (int) (unProtectedSet.size() * 0.3);
+
+				List<AbstractCell> sortedList = new ArrayList<>(unProtectedSet);
+				Collections.sort(sortedList,
+						(a, b) -> Double.compare(((LandCell) b).getProtectionIndex(), ((LandCell) a).getProtectionIndex()));
+				
+				
+				List<AbstractCell> topN = sortedList.subList(0, Math.min(n, sortedList.size()));
+				
+				if(unProtectedSet.size()/(double) (modelRunner.getState(CellSet.class).size()) <= ((ExperimentModelRunner2)modelRunner).getUnprotectionLimit()) {
+					topN = new ArrayList<AbstractCell>();
+					System.out.println("Protected area exceeds limit");
+				}
+				// change the state of cells to protected and modify
+				// landCell.getProductionFilter()
+				topN.forEach(landCell -> {
+
+					landCell.setProteced(true);
+					landCell.getProductionFilter().put("Meat", 0.0);
+					landCell.getProductionFilter().put("Crops", 0.0);
+					landCell.getProductionFilter().put("Diversity", 1.0);
+					landCell.getProductionFilter().put("Timber", 1.0);
+					landCell.getProductionFilter().put("Carbon", 1.0);
+					landCell.getProductionFilter().put("Urban", 0.0);
+					landCell.getProductionFilter().put("Rereation", 1.0);
+					
+					//update production on protected area
+					modelRunner.getState(DataCenter.class).getServiceNameList().forEach(service -> {
+						double newProduction = landCell.getServiceProductionMap().get(service) * landCell.getProductionFilter().get(service);
+						landCell.getServiceProductionMap().put(service, newProduction);
+						
+					});
+					
+				});
+
+				// Remove the selected LandCell instances from unProtectedSet
+				unProtectedSet.removeAll(topN);
+//				System.out.println("unProtected proportion:"
+//						+ (double) (unProtectedSet.size()) / (double) (modelRunner.getState(CellSet.class).size()));
+//				System.out.println("Protection intervention: " + policy.getIntervention());
+			}
+		});
 		
 	}
+	
 
 }
