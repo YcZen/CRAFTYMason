@@ -77,7 +77,7 @@ END_FUZZIFY
 
 // Defzzzify output variable intervention: {’neutral’,'plight',’pmild’, 'phigh' }
 DEFUZZIFY intervention			
-	TERM neutral := (0,1) (0.075,0);
+	TERM neutral := (-0.015,1) (0.05,0);
 	TERM plight := (0.025,0) (0.075,1) (0.125,0);
 	TERM pmild := (0.075,0) (0.125,1) (0.175,0);
 	TERM phigh := (0.125,0) (0.2,1);
@@ -124,7 +124,7 @@ END_FUZZIFY
 
 // Defzzzify output variable intervention: {’neutral’,'light',’mild’, 'high' }
 DEFUZZIFY intervention			
-	TERM neutral :=  (-0.075,0) (0,1);
+	TERM neutral :=  (-0.05,0) (0,1) (0.025,1);
 	TERM light := (-0.125,0) (-0.075,1) (-0.025,0);
 	TERM mild := (-0.175,0)(-0.125,1) (-0.075,0) ;
 	TERM high := (-0.2,1) (-0.125,0) ;

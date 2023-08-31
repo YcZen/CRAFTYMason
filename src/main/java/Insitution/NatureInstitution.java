@@ -9,7 +9,7 @@ import crafty.AbstractCell;
 import crafty.CellSet;
 import crafty.DataCenter;
 import crafty.LandCell;
-import experiment1.ExperimentModelRunner2;
+import experiment1.IntraPoliciesCombined;
 import modelRunner.AbstractModelRunner;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
@@ -63,22 +63,22 @@ public class NatureInstitution extends AbstractInstitution {
 		fuzzyPrepare();
 		Policy policy = new Policy.Builder()
 				.policyName("subsidy to increase diversity")
-				.type(PolicyType.ECO)
-				.goal(((ExperimentModelRunner2)modelRunner).getGoal() * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Diversity"))
+				.type(PolicyType.SUBSIDY)
+				.goal(((IntraPoliciesCombined)modelRunner).getDivGoal() * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Diversity"))
 				.initialGuess(10000.)
 				.inertia(0.2)
 				.policyLag(5)
 				.targetService("Diversity")
 				.build();		
-	//	this.register(policy);
+		this.register(policy);
 		
 		policy = new Policy.Builder()
 				.policyName("Protected areas")
 				.type(PolicyType.PROTECTION)
-				.goal(2 * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Diversity"))
+				.goal(((IntraPoliciesCombined)modelRunner).getDivGoal() * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Diversity"))
 				.initialGuess(10000.)
 				.inertia(0.2)
-				.policyLag(1)
+				.policyLag(((IntraPoliciesCombined)modelRunner).getPolicyLag())
 				.targetService("Diversity")
 				.build();		
 		this.register(policy);
@@ -151,7 +151,9 @@ public class NatureInstitution extends AbstractInstitution {
 				double interventionModifier = policy.getInterventionModifier();
 				functionBlock.setVariable("gap", policy.getEvluation());
 				functionBlock.evaluate();
-				double incrementalIntervention = (policy.getInertia()<functionBlock.getVariable("intervention").getValue())? policy.getInertia(): functionBlock.getVariable("intervention").getValue();
+				double fuzzyResult = functionBlock.getVariable("intervention").getValue();
+				double bound = Math.signum(fuzzyResult)*policy.getInertia();
+				double incrementalIntervention = (Math.abs(bound)<Math.abs(fuzzyResult))? bound:fuzzyResult;
 				policy.setInterventionModifier(incrementalIntervention + interventionModifier);
 				policy.updateIntervention();
 				System.out.println("average gap: " + policy.getEvluation() + "; intervention: " + functionBlock.getVariable("intervention").getValue());
@@ -235,7 +237,7 @@ public class NatureInstitution extends AbstractInstitution {
 		fuzzyTax = fis.getFunctionBlock("tax");
 		fuzzySubsidy = fis.getFunctionBlock("subsidy");
 		fuzzyECO = fis.getFunctionBlock("policy");
-		fuzzyProect = fis.getFunctionBlock("protection");
+		fuzzyProect = fis.getFunctionBlock("policy");
 		// Show
 	//	JFuzzyChart.get().chart(fuzzyTax);
 	//	JFuzzyChart.get().chart(fuzzySubsidy);
@@ -247,6 +249,9 @@ public class NatureInstitution extends AbstractInstitution {
 			if(policy.getType()==PolicyType.PROTECTION && policy.isStartChanging()==true) {
 				double intervention = policy.getIntervention();
 				int n = (int) intervention;
+				if (n<0) {
+					n=0;
+				}
 		//		int n = (int) (unProtectedSet.size() * intervention); 
 		//		int n = (int) (unProtectedSet.size() * 0.3);
 
@@ -257,7 +262,7 @@ public class NatureInstitution extends AbstractInstitution {
 				
 				List<AbstractCell> topN = sortedList.subList(0, Math.min(n, sortedList.size()));
 				
-				if(unProtectedSet.size()/(double) (modelRunner.getState(CellSet.class).size()) <= ((ExperimentModelRunner2)modelRunner).getUnprotectionLimit()) {
+				if(unProtectedSet.size()/(double) (modelRunner.getState(CellSet.class).size()) <= ((IntraPoliciesCombined)modelRunner).getUnprotectionLimit()) {
 					topN = new ArrayList<AbstractCell>();
 					System.out.println("Protected area exceeds limit");
 				}
@@ -269,10 +274,10 @@ public class NatureInstitution extends AbstractInstitution {
 					landCell.getProductionFilter().put("Meat", 0.0);
 					landCell.getProductionFilter().put("Crops", 0.0);
 					landCell.getProductionFilter().put("Diversity", 1.0);
-					landCell.getProductionFilter().put("Timber", 1.0);
-					landCell.getProductionFilter().put("Carbon", 1.0);
+					landCell.getProductionFilter().put("Timber", 0.0);
+					landCell.getProductionFilter().put("Carbon", 0.0);
 					landCell.getProductionFilter().put("Urban", 0.0);
-					landCell.getProductionFilter().put("Rereation", 1.0);
+					landCell.getProductionFilter().put("Rereation", 0.0);
 					
 					//update production on protected area
 					modelRunner.getState(DataCenter.class).getServiceNameList().forEach(service -> {

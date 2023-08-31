@@ -16,7 +16,7 @@ public class UtilityUpdater extends AbstractUpdater{
 	public void step(SimState arg0) {
 		modelRunner.getState(DataCenter.class).updateUtility();
 	//	System.out.println("running");
-		
+		System.out.println(modelRunner.getState(DataCenter.class).AFTCounter);
 		
 	}
 

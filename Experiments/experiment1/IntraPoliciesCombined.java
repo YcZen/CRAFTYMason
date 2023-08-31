@@ -14,19 +14,24 @@ import updaters.MapUpdater;
 import updaters.SupplyInitializer;
 import updaters.SupplyUpdater;
 
-public class ExperimentModelRunner2 extends ModelRunner{
+public class IntraPoliciesCombined extends ModelRunner{
 	
 ////////////Experimental parameters///////////////////
-	protected  double goal;
-private double limit = 0.7; 
+	private  double meatGoal = 1;
+	private double cropGoal = 4;
+	private double divGoal = 5;
+	private double limit = 0.7; 
+	private int policyLag = 5;
+	private int meatLag = 1 ;
+	private int cropLag = 1;
 
-	public ExperimentModelRunner2(long seed) {
+	public IntraPoliciesCombined(long seed) {
 		super(seed);
 		loadStateManager();
 	}
 	
 	public static void main(String[] args) {
-		doLoop(ExperimentModelRunner2.class, args);
+		doLoop(IntraPoliciesCombined.class, args);
 		System.exit(0);
 	}
 	
@@ -43,7 +48,7 @@ private double limit = 0.7;
 		stateManager.add(dataCenter.getCellSet());
 		stateManager.add(new SupplyUpdater());
 	
-	//	stateManager.add(new AgriInstitution());
+		stateManager.add(new AgriInstitution());
 		stateManager.add(new NatureInstitution());
 //		stateManager.add(new MapUpdater());
 		stateManager.add(new GridOfCharts());
@@ -272,14 +277,25 @@ public void setAnualDemandFile(String anualDemandFile) {
 this.anualDemandFile = anualDemandFile;
 }
 
-public void setGoal(double goal) {
+public void setMeatGoal(double meatGoal) {
 
-this.goal = goal;
+this.meatGoal = meatGoal;
 
 }
-public double getGoal() {
+public double getMeatGoal() {
 
-	return goal;
+	return meatGoal;
+
+}
+
+public void setCropGoal(double cropGoal) {
+
+this.cropGoal = cropGoal;
+
+}
+public double getCropGoal() {
+
+	return cropGoal;
 
 }
 
@@ -290,4 +306,46 @@ public void setUnprotectionLimit(double limit) {
 public double getUnprotectionLimit() {
 	return limit;
 }
+
+public int getPolicyLag() {
+	return policyLag;
+}
+
+public void setPolicyLag(int policyLag) {
+	this.policyLag = policyLag;
+}
+
+public double getDivGoal() {
+	return divGoal;
+}
+
+public void setDivGoal(double divGoal) {
+	this.divGoal = divGoal;
+}
+
+public int getMeatLag() {
+	
+	return meatLag;
+}
+
+public void setMeatLag(int meatLag) {
+	this.meatLag = meatLag;
+}
+
+public int getCropLag() {
+	// TODO Auto-generated method stub
+	return cropLag;
+}
+
+public void setCropLag(int cropLag) {
+	this.cropLag = cropLag;
+}
+
+@Override
+public double[] assess(int numObjectives) {
+	return null;
+	
+}
+
+
 }

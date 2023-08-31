@@ -13,18 +13,18 @@ import updaters.MapUpdater;
 import updaters.SupplyInitializer;
 import updaters.SupplyUpdater;
 
-public class ExperimentModelRunner1 extends ModelRunner{
+public class IndividualPolicies extends ModelRunner{
 	
 ////////////Experimental parameters///////////////////
 	protected  double goal; 
 
-	public ExperimentModelRunner1(long seed) {
+	public IndividualPolicies(long seed) {
 		super(seed);
 		loadStateManager();
 	}
 	
 	public static void main(String[] args) {
-		doLoop(ExperimentModelRunner1.class, args);
+		doLoop(IndividualPolicies.class, args);
 		System.exit(0);
 	}
 	

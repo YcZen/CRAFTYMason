@@ -47,7 +47,7 @@ public class TestTipper2 {
 		
 // -----------------------------------------------	
 		// Get default function block
-		FunctionBlock functionBlock = fis.getFunctionBlock("protection");
+		FunctionBlock functionBlock = fis.getFunctionBlock("subsidy");
 
 		// Show
 		JFuzzyChart.get().chart(functionBlock);

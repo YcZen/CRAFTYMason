@@ -5,8 +5,8 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 
 import crafty.DataCenter;
-import experiment1.ExperimentModelRunner1;
-import experiment1.ExperimentModelRunner2;
+import experiment1.IndividualPolicies;
+import experiment1.IntraPoliciesCombined;
 import modelRunner.AbstractModelRunner;
 import modelRunner.ModelRunner;
 import sim.display.Console;
@@ -28,7 +28,7 @@ public class ModelRunnerWithUI extends GUIState{
 	
 	public ModelRunnerWithUI() {
 		//super(new ModelRunner(System.currentTimeMillis())); 
-		super(new ExperimentModelRunner2(System.currentTimeMillis())); 
+		super(new IntraPoliciesCombined(System.currentTimeMillis())); 
 	}
 	
 	public ModelRunnerWithUI(SimState state) {

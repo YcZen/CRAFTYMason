@@ -2,7 +2,7 @@ package insitution;
 
 import java.util.List;
 import crafty.DataCenter;
-import experiment1.ExperimentModelRunner1;
+import experiment1.IntraPoliciesCombined;
 import modelRunner.AbstractModelRunner;
 import modelRunner.ModelRunner;
 import net.sourceforge.jFuzzyLogic.FIS;
@@ -27,25 +27,25 @@ public class AgriInstitution extends AbstractInstitution{
 		fuzzyPrepare();
 		Policy policy = new Policy.Builder()
 								.policyName("decrease meat")
-								//.type(PolicyType.TAX)
-								.type(PolicyType.ECO)
-								.goal(((ExperimentModelRunner1)modelRunner).getGoal() * modelRunner.getState(DataCenter.class).getInitSupplyMap().get("Meat"))
+								.type(PolicyType.TAX)
+							//	.type(PolicyType.ECO)
+								.goal(((IntraPoliciesCombined)modelRunner).getMeatGoal() * modelRunner.getState(DataCenter.class).getInitSupplyMap().get("Meat"))
 							//	.goal(5 * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Meat"))
 								.initialGuess(1000000.)
 								.inertia(0.2)
-								.policyLag(5)
+								.policyLag(((IntraPoliciesCombined)modelRunner).getMeatLag())
 								.targetService("Meat")
 								.build();		
-	//	this.register(policy);
+		this.register(policy);
 		
 		policy = new Policy.Builder()
 							.policyName("increase crop")
-							//.type(PolicyType.SUBSIDY)
-							.type(PolicyType.ECO)
-							.goal(((ExperimentModelRunner1)modelRunner).getGoal() * modelRunner.getState(DataCenter.class).getInitSupplyMap().get("Crops"))
+							.type(PolicyType.SUBSIDY)
+							//.type(PolicyType.ECO)
+							.goal(((IntraPoliciesCombined)modelRunner).getCropGoal() * modelRunner.getState(DataCenter.class).getInitSupplyMap().get("Crops"))
 							.initialGuess(1000000.)
 							.inertia(0.2)
-							.policyLag(5)
+							.policyLag(((IntraPoliciesCombined)modelRunner).getCropLag())
 							.targetService("Crops")
 							.build();	
 		this.register(policy);
@@ -109,10 +109,14 @@ public class AgriInstitution extends AbstractInstitution{
 				double interventionModifier = policy.getInterventionModifier();
 				functionBlock.setVariable("gap", policy.getEvluation());
 				functionBlock.evaluate();
-				double incrementalIntervention = (policy.getInertia()<functionBlock.getVariable("intervention").getValue())? policy.getInertia(): functionBlock.getVariable("intervention").getValue();
+				double fuzzyResult = functionBlock.getVariable("intervention").getValue();
+				double bound = Math.signum(fuzzyResult)*policy.getInertia();
+				double incrementalIntervention = (Math.abs(bound)<Math.abs(fuzzyResult))? bound:fuzzyResult;
 				policy.setInterventionModifier(incrementalIntervention + interventionModifier);
+//				double incrementalIntervention = Math.abs( policy.getInertia())<Math.abs( policy.getEvluation())? Math.abs( policy.getEvluation())/policy.getEvluation()*policy.getInertia():policy.getEvluation();//(policy.getInertia()<functionBlock.getVariable("intervention").getValue())? policy.getInertia(): functionBlock.getVariable("intervention").getValue();
+//				policy.setInterventionModifier(incrementalIntervention + interventionModifier);
 				policy.updateIntervention();
-	//			System.out.println("average gap: " + policy.getEvluation() + "; intervention: " + functionBlock.getVariable("intervention").getValue());
+				System.out.println("average gap: " + policy.getEvluation() + "; intervention: " + policy.getIntervention());// + functionBlock.getVariable("intervention").getValue());
 			}
 		});
 	}
@@ -134,7 +138,7 @@ public class AgriInstitution extends AbstractInstitution{
 		});
 		
 		String[] agriProductionList = {"Meat","Crops"};
-		double proportion = 0.;
+		double proportion = 2.0;
 		for(String production : agriProductionList) {
 			totalBugdet += (proportion * modelRunner.getState(DataCenter.class).getGlobalProductionMap().get(production));
 		}
@@ -225,7 +229,7 @@ public class AgriInstitution extends AbstractInstitution{
 		policyEvaluation();
 		policyAdaptation();
 		budgetUpdate();
-//		resourceAllocation();
+		resourceAllocation();
 	//	implementPolicy();  // this method is exectued in utilityUpdater
 		updatePolicyHistory();
 	}
