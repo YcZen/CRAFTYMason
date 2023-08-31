@@ -1,4 +1,4 @@
-package insitution;
+package institution;
 
 import java.util.ArrayList;
 import java.util.Collections;

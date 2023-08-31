@@ -4,8 +4,8 @@ import java.util.HashMap;
 
 import crafty.DataCenter;
 import display.GridOfCharts;
-import insitution.AgriInstitution;
-import insitution.NatureInstitution;
+import institution.AgriInstitution;
+import institution.NatureInstitution;
 import modelRunner.ModelRunner;
 import updaters.CapitalUpdater;
 import updaters.DemandUpdater;

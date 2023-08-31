@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import crafty.DataCenter;
 import crafty.ModelState;
-import insitution.AbstractInstitution;
+import institution.AbstractInstitution;
 import modelRunner.AbstractModelRunner;
 import modelRunner.ModelRunner;
 import sim.engine.SimState;

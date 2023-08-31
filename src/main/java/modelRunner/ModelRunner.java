@@ -10,7 +10,7 @@ import javax.swing.SwingUtilities;
 import crafty.DataCenter;
 import crafty.ModelState;
 import display.GridOfCharts;
-import insitution.AgriInstitution;
+import institution.AgriInstitution;
 import sim.engine.SimState;
 import sim.field.grid.IntGrid2D;
 import tech.tablesaw.api.Table;

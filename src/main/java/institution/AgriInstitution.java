@@ -1,13 +1,11 @@
-package insitution;
+package institution;
 
 import java.util.List;
 import crafty.DataCenter;
 import experiment1.IntraPoliciesCombined;
 import modelRunner.AbstractModelRunner;
-import modelRunner.ModelRunner;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
-import net.sourceforge.jFuzzyLogic.plot.JFuzzyChart;
 import sim.engine.SimState;
 
 public class AgriInstitution extends AbstractInstitution{

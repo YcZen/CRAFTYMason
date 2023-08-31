@@ -1,4 +1,4 @@
-package insitution;
+package institution;
 
 public class Bugdet {
 

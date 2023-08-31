@@ -1,7 +1,7 @@
 package updaters;
 
 
-import insitution.AbstractInstitution;
+import institution.AbstractInstitution;
 import sim.engine.SimState;
 
 public class InfluencedUtilityUpdater extends UtilityUpdater{

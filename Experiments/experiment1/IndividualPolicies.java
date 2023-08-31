@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import crafty.DataCenter;
 import display.GridOfCharts;
-import insitution.AgriInstitution;
+import institution.AgriInstitution;
 import modelRunner.ModelRunner;
 import updaters.CapitalUpdater;
 import updaters.DemandUpdater;
