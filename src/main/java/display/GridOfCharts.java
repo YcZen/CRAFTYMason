@@ -3,6 +3,7 @@ package display;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -66,7 +67,7 @@ public class GridOfCharts implements ModelState,Steppable {
                  dataset.addSeries(demandSeries);
                 
                  chart = ChartFactory.createXYLineChart(
-                		 serviceName, "Time", "Quantity", dataset);
+                		 serviceName, "Time", "Quantity", dataset, PlotOrientation.VERTICAL, false, false, false);
                  
               // Set chart and plot background to white
                  chart.setBackgroundPaint(Color.WHITE);
