@@ -1,6 +1,5 @@
 package crafty;
 
-
 import java.util.HashMap;
 
 public class SensitivityMap extends HashMap<String, Double> {

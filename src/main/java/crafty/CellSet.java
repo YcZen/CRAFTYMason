@@ -1,6 +1,5 @@
 package crafty;
 
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,8 +34,6 @@ public class CellSet extends HashSet<AbstractCell> implements ModelState {
 		});
 	}
 
-
-
 	public HashMap<String, AbstractCell> getCellHashMap() {
 		return cellHashMap;
 	}
@@ -44,7 +41,7 @@ public class CellSet extends HashSet<AbstractCell> implements ModelState {
 	@Override
 	public void toSchedule() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

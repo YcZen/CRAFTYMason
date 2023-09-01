@@ -1,6 +1,5 @@
 package crafty;
 
-
 import java.util.HashMap;
 import java.util.Set;
 
@@ -13,6 +12,7 @@ public class LandCell extends AbstractCell {
 // protected Table ownerServiceTable;
 // protected Manager owner;
 	protected AbstractModelRunner modelRunner;
+
 	public Manager getOwner() {
 		return owner;
 	}
@@ -29,7 +29,6 @@ public class LandCell extends AbstractCell {
 //		initializeNeighborSet(modelRunner.getState(CellSet.class));
 
 	}
-
 
 	@Override
 	public void initializeCapitalFilter() {
@@ -124,15 +123,13 @@ public class LandCell extends AbstractCell {
 	@Override
 	public void initializeProductionFilter() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void toSchedule() {
 		// TODO Auto-generated method stub
-		
-	}
 
-	
+	}
 
 }

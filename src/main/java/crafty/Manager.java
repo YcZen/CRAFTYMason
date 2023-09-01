@@ -1,6 +1,5 @@
 package crafty;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,12 +40,11 @@ public class Manager extends AbstractManager {
 	@Override
 	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
-		
+
 		managerProduce(); // manager should produce once to let the model calculate
 		// the utility for the
 		// 0th tick.
 	}
-
 
 	@Override
 	public String getManagerType() {
@@ -151,7 +149,7 @@ public class Manager extends AbstractManager {
 
 	@Override
 	protected void managerSearch() {
-		//if (modelRunner.schedule.getTime() >= 1 && representative == true) {
+		// if (modelRunner.schedule.getTime() >= 1 && representative == true) {
 		if (representative == true) {
 			CellSet cellSet = modelRunner.getState(CellSet.class);
 
@@ -178,25 +176,30 @@ public class Manager extends AbstractManager {
 																									// from
 																									// one-owner-many-lands
 																									// code
-					if (myCompetitiveness > otherCompetitiveness & new Random().nextDouble() <  modelRunner.getThreshold()) {
-						
+					if (myCompetitiveness > otherCompetitiveness
+							& new Random().nextDouble() < modelRunner.getThreshold()) {
+
 						HashMap<String, Integer> AFTCounter = modelRunner.getState(DataCenter.class).AFTCounter;
-						// 1.the previous owner remove this cell from its landSet and the AFTCounter subtract 1 correspondingly.
+						// 1.the previous owner remove this cell from its landSet and the AFTCounter
+						// subtract 1 correspondingly.
 						landCell.getOwner().getLandSet().remove(landCell);
-						AFTCounter.put(landCell.getOwner().getManagerType(), AFTCounter.get(landCell.getOwner().getManagerType())-1);
+						AFTCounter.put(landCell.getOwner().getManagerType(),
+								AFTCounter.get(landCell.getOwner().getManagerType()) - 1);
 						// 1.5 if the previous owner is not representative and has not land, then remove
 						// it from ManagerSet.
 						if (landCell.getOwner().isRepresentative() != true
 								&& landCell.getOwner().getLandSet().size() == 0) {
 							modelRunner.getState(DataCenter.class).getManagerSet().remove(landCell.getOwner());
 						}
-						// 2.this landCell set the owner to this new manager, and the AFTCounter plus 1 correspondingly.
+						// 2.this landCell set the owner to this new manager, and the AFTCounter plus 1
+						// correspondingly.
 						Manager newOwnerManager = this.clone();
 						newOwnerManager.mutate(0.0, 0.1);
 						modelRunner.getState(DataCenter.class).getManagerSet().add(newOwnerManager);
 						landCell.setOwner(newOwnerManager);
-						
-						AFTCounter.put(landCell.getOwner().getManagerType(), AFTCounter.get(landCell.getOwner().getManagerType())+1);
+
+						AFTCounter.put(landCell.getOwner().getManagerType(),
+								AFTCounter.get(landCell.getOwner().getManagerType()) + 1);
 						// 3.this new manager add this landCell to its landSet
 						landCell.getOwner().getLandSet().add(landCell);
 						// 4.this landCell update its service production according to the new owner
@@ -204,8 +207,7 @@ public class Manager extends AbstractManager {
 								newOwnerManager, modelRunner.getState(DataCenter.class));
 						landCell.setServiceProductionMap(newSerivceMapHere);
 						landCell.getOwner().setServiceProductionMap(newSerivceMapHere);
-						
-						
+
 					}
 				}
 			}
@@ -268,8 +270,9 @@ public class Manager extends AbstractManager {
 
 	@Override
 	public void toSchedule() {
-		modelRunner.schedule.scheduleRepeating(0, modelRunner.indexOf(modelRunner.getState(ManagerSet.class)), this, 1.0);
-	//	modelRunner.schedule.scheduleRepeating(0, -1, this, 1.0);
+		modelRunner.schedule.scheduleRepeating(0, modelRunner.indexOf(modelRunner.getState(ManagerSet.class)), this,
+				1.0);
+		// modelRunner.schedule.scheduleRepeating(0, -1, this, 1.0);
 	}
 
 //	private Manager managerSpawn(Manager originManager){

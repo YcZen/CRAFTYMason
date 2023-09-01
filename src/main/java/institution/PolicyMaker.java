@@ -20,7 +20,7 @@ public class PolicyMaker {
 	protected double supplyPredicted;
 	protected double learningRate = 1.;
 	protected Integer id = null;
-	FunctionBlock functionBlock ;
+	FunctionBlock functionBlock;
 	double initialGuess;
 	int policyLag = 5;
 
@@ -50,7 +50,7 @@ public class PolicyMaker {
 		setGoals(serviceType, startYear, endYear, startQuantity, endQuantity);
 		fuzzyPrepare();
 	}
-	
+
 	public void setFinalGoal(ModelRunner modelRunner, int serviceIndex, double quantity, double initialGuess) {
 		String serviceType = modelRunner.getState(DataCenter.class).getServiceNameList().get(serviceIndex);
 		int startYear = 0;
@@ -61,7 +61,6 @@ public class PolicyMaker {
 		fuzzyPrepare();
 		this.initialGuess = initialGuess;
 	}
-	
 
 	public List<Double> getGoals(String serviceType) {
 		return policyMap.get(serviceType).getDecomposedGoals();
@@ -77,30 +76,32 @@ public class PolicyMaker {
 	public void updatePolicyModifier(String service, List<Double> historicalSupply, double predictedSupply) {
 		SimplePolicy policy = policyMap.get(service);
 		double interventionModifier = policy.getIntervModifier();
-	//	policyLag = 5;
-		if (historicalSupply.size() >= policyLag & historicalSupply.size()%5==0) {
+		// policyLag = 5;
+		if (historicalSupply.size() >= policyLag & historicalSupply.size() % 5 == 0) {
 			int start = historicalSupply.size() - policyLag;
 			int end = historicalSupply.size();
 			List<Double> recentSupply = historicalSupply.subList(start, end);
 			List<Double> recentGoals;
-			if(end <= policy.getDecomposedGoals().size()) {
+			if (end <= policy.getDecomposedGoals().size()) {
 				recentGoals = policy.getDecomposedGoals().subList(start, end);
-			}else {
-				double finalGoal = policy.getDecomposedGoals().get(policy.getDecomposedGoals().size()-1);
+			} else {
+				double finalGoal = policy.getDecomposedGoals().get(policy.getDecomposedGoals().size() - 1);
 				recentGoals = new ArrayList<>(Collections.nCopies(policyLag, finalGoal));
 			}
-			 
+
 			double averageGap = 0;
 			for (int i = 0; i < policyLag; i++) {
 				averageGap = averageGap + (recentGoals.get(i) - recentSupply.get(i)) / recentGoals.get(i);
 			}
 			averageGap = averageGap / policyLag;
-	//		policy.setIntervModifier((0 + averageGap * this.learningRate) + interventionModifier);
+			// policy.setIntervModifier((0 + averageGap * this.learningRate) +
+			// interventionModifier);
 			functionBlock.setVariable("gap", averageGap);
 			functionBlock.evaluate();
 			policy.setIntervModifier(functionBlock.getVariable("intervention").getValue() + interventionModifier);
-			System.out.println("average gap: " + averageGap + "; intervention: " + functionBlock.getVariable("intervention").getValue());
-			
+			System.out.println("average gap: " + averageGap + "; intervention: "
+					+ functionBlock.getVariable("intervention").getValue());
+
 		}
 
 	}
@@ -121,8 +122,8 @@ public class PolicyMaker {
 //		double intervention = (policy.getIntervModifier() * policy.getDecomposedGoals().get(ticks + 1)
 //				- predictedAnualDemand) / predictedSupply;//
 //		double intervention = (1 * policy.getDecomposedGoals().get(ticks + 1) - predictedAnualDemand) / predictedSupply;//
-		//initialGuess = 30000.;
-		double intervention = policy.getIntervModifier() * initialGuess ;/// predictedSupply;
+		// initialGuess = 30000.;
+		double intervention = policy.getIntervModifier() * initialGuess;/// predictedSupply;
 		return intervention;
 	}
 
@@ -166,23 +167,23 @@ public class PolicyMaker {
 	public HashMap<String, SimplePolicy> getPolicyMap() {
 		return policyMap;
 	}
-	
+
 	public void fuzzyPrepare() {
 		// Load from 'FCL' file
 		String fileName = "resources/fcl/tipper.fcl";
 		FIS fis = FIS.load(fileName, true);
-		
+
 		// Error while loading?
 		if (fis == null) {
 			System.err.println("Can't load file: '" + fileName + "'");
 			return;
 		}
-		
+
 		// Get policy function block
 		functionBlock = fis.getFunctionBlock("policy");
 
 		// Show
-	//	JFuzzyChart.get().chart(functionBlock);
+		// JFuzzyChart.get().chart(functionBlock);
 
 //		// Set inputs
 //		functionBlock.setVariable("gap", -0.0);
@@ -192,7 +193,7 @@ public class PolicyMaker {
 
 		// Show output variable's chart
 		Variable interven = functionBlock.getVariable("intervention");
-	//	JFuzzyChart.get().chart(interven, interven.getDefuzzifier(), true);
+		// JFuzzyChart.get().chart(interven, interven.getDefuzzifier(), true);
 	}
 
 	public double getInitialGuess() {

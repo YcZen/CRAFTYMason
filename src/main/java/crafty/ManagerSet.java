@@ -1,6 +1,5 @@
 package crafty;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,7 +42,7 @@ public class ManagerSet extends HashSet<AbstractManager> implements ModelState {
 		this.forEach(agent -> {
 			agent.toSchedule();
 		});
-		
+
 	}
 
 }

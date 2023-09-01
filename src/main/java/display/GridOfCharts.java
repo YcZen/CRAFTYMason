@@ -24,87 +24,83 @@ import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.List;
 
+public class GridOfCharts implements ModelState, Steppable {
 
-public class GridOfCharts implements ModelState,Steppable {
-
-    /**
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-    AbstractModelRunner modelRunner;
-    public JFrame frame;
-    private HashMap<String, XYSeries> totalProductionSeries = new HashMap<String, XYSeries>();
-    private HashMap<String, XYSeries> totalDemandSeries = new HashMap<String, XYSeries>();
-    private HashMap<String, Double> productionHashMap;
+	AbstractModelRunner modelRunner;
+	public JFrame frame;
+	private HashMap<String, XYSeries> totalProductionSeries = new HashMap<String, XYSeries>();
+	private HashMap<String, XYSeries> totalDemandSeries = new HashMap<String, XYSeries>();
+	private HashMap<String, Double> productionHashMap;
 	private HashMap<String, Double> demandHashMap;
 
-    
-    public GridOfCharts() {
-    	
-        frame = new JFrame("Ecoservices");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	public GridOfCharts() {
 
-       
-    }
-    
-    public void prepare() {
-    	productionHashMap = modelRunner.getState(DataCenter.class).getGlobalProductionMap();
-    	demandHashMap = modelRunner.getState(DataCenter.class).getAnualDemand();
-    	List<String> serviceNameList = modelRunner.getState(DataCenter.class).getServiceNameList();
-    	
-         for (String serviceName : serviceNameList) {
-        	 
-        	 XYSeriesCollection dataset = new XYSeriesCollection();
-             JFreeChart chart;
-             
-             XYSeries supplySeries = new XYSeries(serviceName + " Supply");
-             XYSeries demandSeries = new XYSeries(serviceName + " Demand");
-             
-             totalProductionSeries.put(serviceName, supplySeries);
-             totalDemandSeries.put(serviceName,demandSeries);
-             
-                 dataset.addSeries(supplySeries);
-                 dataset.addSeries(demandSeries);
-                
-                 chart = ChartFactory.createXYLineChart(
-                		 serviceName, "Time", "Quantity", dataset, PlotOrientation.VERTICAL, false, false, false);
-                 
-              // Set chart and plot background to white
-                 chart.setBackgroundPaint(Color.WHITE);
-                 XYPlot plot = (XYPlot) chart.getPlot();
-                 plot.setBackgroundPaint(Color.WHITE);
+		frame = new JFrame("Ecoservices");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-                 // Make lines thicker
-                 XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
-                 BasicStroke thickStroke = new BasicStroke(2.0f);
-                 renderer.setStroke(thickStroke);
+	}
 
-             frame.add(new ChartPanel(chart));
-         }
-         
-     
-			int dataSize = modelRunner.getState(DataCenter.class).getGlobalProductionMap().size();
-			int gridWidth = (int) Math.ceil(Math.sqrt(dataSize));
-			frame.setLayout(new GridLayout(gridWidth, gridWidth));
-			frame.pack();
-			frame.setLocationRelativeTo(null);
-			frame.setVisible(true);
-	       
-         
+	public void prepare() {
+		productionHashMap = modelRunner.getState(DataCenter.class).getGlobalProductionMap();
+		demandHashMap = modelRunner.getState(DataCenter.class).getAnualDemand();
+		List<String> serviceNameList = modelRunner.getState(DataCenter.class).getServiceNameList();
 
-    }
+		for (String serviceName : serviceNameList) {
 
-    private void updateChart() {
-        modelRunner.getState(DataCenter.class).getServiceNameList().forEach(productionName -> {
-        	totalProductionSeries.get(productionName).add(modelRunner.schedule.getSteps(), productionHashMap.get(productionName));
-        	totalDemandSeries.get(productionName).add(modelRunner.schedule.getSteps(),demandHashMap.get(productionName));
-        });
-    }
+			XYSeriesCollection dataset = new XYSeriesCollection();
+			JFreeChart chart;
+
+			XYSeries supplySeries = new XYSeries(serviceName + " Supply");
+			XYSeries demandSeries = new XYSeries(serviceName + " Demand");
+
+			totalProductionSeries.put(serviceName, supplySeries);
+			totalDemandSeries.put(serviceName, demandSeries);
+
+			dataset.addSeries(supplySeries);
+			dataset.addSeries(demandSeries);
+
+			chart = ChartFactory.createXYLineChart(serviceName, "Time", "Quantity", dataset, PlotOrientation.VERTICAL,
+					false, false, false);
+
+			// Set chart and plot background to white
+			chart.setBackgroundPaint(Color.WHITE);
+			XYPlot plot = (XYPlot) chart.getPlot();
+			plot.setBackgroundPaint(Color.WHITE);
+
+			// Make lines thicker
+			XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
+			BasicStroke thickStroke = new BasicStroke(2.0f);
+			renderer.setDefaultStroke(thickStroke);
+
+			frame.add(new ChartPanel(chart));
+		}
+
+		int dataSize = modelRunner.getState(DataCenter.class).getGlobalProductionMap().size();
+		int gridWidth = (int) Math.ceil(Math.sqrt(dataSize));
+		frame.setLayout(new GridLayout(gridWidth, gridWidth));
+		frame.pack();
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(true);
+
+	}
+
+	private void updateChart() {
+		modelRunner.getState(DataCenter.class).getServiceNameList().forEach(productionName -> {
+			totalProductionSeries.get(productionName).add(modelRunner.schedule.getSteps(),
+					productionHashMap.get(productionName));
+			totalDemandSeries.get(productionName).add(modelRunner.schedule.getSteps(),
+					demandHashMap.get(productionName));
+		});
+	}
 
 	@Override
 	public void step(SimState arg0) {
 		updateChart();
-	//	System.out.println("Charts step");
+		// System.out.println("Charts step");
 	}
 
 	@Override
@@ -113,11 +109,8 @@ public class GridOfCharts implements ModelState,Steppable {
 		totalProductionSeries.clear();
 		totalDemandSeries.clear();
 		prepare();
-		
-		
-		
-	}
 
+	}
 
 	@Override
 	public void toSchedule() {

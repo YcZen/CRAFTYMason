@@ -1,6 +1,5 @@
 package test;
 
-
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import net.sourceforge.jFuzzyLogic.plot.JFuzzyChart;
@@ -44,7 +43,7 @@ public class TestTipper2 {
 //		for( Rule r : functionBlock.getFuzzyRuleBlock("No1").getRules() ) {
 //		      System.out.println(r);
 //		  }
-		
+
 // -----------------------------------------------	
 		// Get default function block
 		FunctionBlock functionBlock = fis.getFunctionBlock("subsidy");
@@ -64,14 +63,14 @@ public class TestTipper2 {
 
 		// Print ruleSet
 //		System.out.println(functionBlock);
-	    System.out.println("Output value:" + functionBlock.getVariable("intervention").getValue()); 
-	 // Show each rule (and degree of support)
-	    for( Rule r : functionBlock.getFuzzyRuleBlock("No1").getRules() ) {
-	      System.out.println(r);
-	  }
-		
+		System.out.println("Output value:" + functionBlock.getVariable("intervention").getValue());
+		// Show each rule (and degree of support)
+		for (Rule r : functionBlock.getFuzzyRuleBlock("No1").getRules()) {
+			System.out.println(r);
+		}
+
 //-------------------------------------------------
-	//	 Get default function block
+		// Get default function block
 //		FunctionBlock functionBlock = fis.getFunctionBlock("foodEmployment");
 //
 //		// Show
@@ -115,6 +114,6 @@ public class TestTipper2 {
 //	    System.out.println(empList);
 //	    System.out.println(foodList);
 //	    System.out.println(subList);
-	    
+
 	}
 }

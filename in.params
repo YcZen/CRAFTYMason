@@ -1,0 +1,16 @@
+### Parameter Test Example
+model = experiments.Intra
+## Variables
+independent = PolicyLag
+min = 1
+max = 5
+divisions = 5
+dependent = IP
+## Sweep Parameters
+trials = 10
+threads = 8
+steps = 10
+mod = 1
+seed = 1745258451
+compress = false
+out = /tmp/out.csv

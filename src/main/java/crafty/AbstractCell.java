@@ -1,6 +1,5 @@
 package crafty;
 
-
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -77,6 +76,6 @@ public abstract class AbstractCell implements ModelState {
 
 	public void initializeProductionFilter(DataCenter dataLoader) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

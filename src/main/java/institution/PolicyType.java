@@ -1,5 +1,5 @@
 package institution;
 
 public enum PolicyType {
-	SUBSIDY, TAX, PROTECTION, ECO,None
+	SUBSIDY, TAX, PROTECTION, ECO, None
 }

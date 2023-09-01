@@ -1,6 +1,5 @@
 package crafty;
 
-
 import java.util.HashMap;
 
 import modelRunner.AbstractModelRunner;
@@ -74,8 +73,8 @@ public class Methods {
 	public static double calculateCompetitivness(HashMap<String, Double> productionHashMap,
 			HashMap<String, Double> utilityhaHashMap, AbstractModelRunner modelRunner) {
 		double competitivness = 0;
-		for (String serviceName : productionHashMap.keySet()) {			
-			competitivness += productionHashMap.get(serviceName) * utilityhaHashMap.get(serviceName) ;
+		for (String serviceName : productionHashMap.keySet()) {
+			competitivness += productionHashMap.get(serviceName) * utilityhaHashMap.get(serviceName);
 		}
 		return competitivness;
 	}

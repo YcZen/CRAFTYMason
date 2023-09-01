@@ -88,7 +88,7 @@ public class ProtectionMaker implements ModelState {
 			if ((averageGap * this.learningRate) + interventionModifier >= 0) {
 				// policy.setIntervModifier((0 + averageGap * this.learningRate) +
 				// interventionModifier);
-				policy.setIntervModifier( averageGap * this.learningRate + interventionModifier);
+				policy.setIntervModifier(averageGap * this.learningRate + interventionModifier);
 				System.out.println("learningRate: " + learningRate);
 				System.out.println("average gap: " + averageGap);
 				;
@@ -160,17 +160,16 @@ public class ProtectionMaker implements ModelState {
 	public void setProtectedAreas(String serviceType) {
 		SimplePolicy policy = policyMap.get(serviceType);
 		double intervention = policy.getIntervention();
-		//int n = (int) (unProtectedSet.size() * intervention); 
+		// int n = (int) (unProtectedSet.size() * intervention);
 		int n = (int) (unProtectedSet.size() * 0.3);
 
 		List<AbstractCell> sortedList = new ArrayList<>(unProtectedSet);
 		Collections.sort(sortedList,
 				(a, b) -> Double.compare(((LandCell) b).getProtectionIndex(), ((LandCell) a).getProtectionIndex()));
-		
-		
+
 		List<AbstractCell> topN = sortedList.subList(0, Math.min(n, sortedList.size()));
-		
-		if(unProtectedSet.size()/(double) (modelRunner.getState(CellSet.class).size()) <= 0.7) {
+
+		if (unProtectedSet.size() / (double) (modelRunner.getState(CellSet.class).size()) <= 0.7) {
 			topN = new ArrayList<AbstractCell>();
 			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		}
@@ -194,7 +193,7 @@ public class ProtectionMaker implements ModelState {
 //			landCell.getProductionFilter().put("Ldiversity", 1.0);
 //			landCell.getProductionFilter().put("GF.milk", 0.0);
 //			landCell.getProductionFilter().put("Sus.Prod", 1.0);
-			
+
 			landCell.getProductionFilter().put("Meat", 0.0);
 			landCell.getProductionFilter().put("Crops", 0.0);
 			landCell.getProductionFilter().put("Diversity", 1.0);
@@ -202,14 +201,15 @@ public class ProtectionMaker implements ModelState {
 			landCell.getProductionFilter().put("Carbon", 0.0);
 			landCell.getProductionFilter().put("Urban", 0.0);
 			landCell.getProductionFilter().put("Rereation", 1.0);
-			
-			//update production on protected area
+
+			// update production on protected area
 			modelRunner.getState(DataCenter.class).getServiceNameList().forEach(service -> {
-				double newProduction = landCell.getServiceProductionMap().get(service) * landCell.getProductionFilter().get(service);
+				double newProduction = landCell.getServiceProductionMap().get(service)
+						* landCell.getProductionFilter().get(service);
 				landCell.getServiceProductionMap().put(service, newProduction);
-				
+
 			});
-			
+
 		});
 
 		// Remove the selected LandCell instances from unProtectedSet
@@ -225,23 +225,20 @@ public class ProtectionMaker implements ModelState {
 
 	}
 
-	
 	public void onStartGo() {
 		if (modelRunner.schedule.getTime() == 0) {
-		//	setGoals(modelRunner, 2, 2.0);
+			// setGoals(modelRunner, 2, 2.0);
 		}
 		makePolicy(serviceType);
 		setProtectedAreas(serviceType);
 
 	}
 
-	
 	public void go() {
 		// TODO Auto-generated method stub
 
 	}
 
-	
 	public void onEndGo() {
 //		updateCollectedData();
 //		updatePolicyModifier(serviceType,
@@ -250,7 +247,7 @@ public class ProtectionMaker implements ModelState {
 
 	public void updateCollectedData() {
 		collectIntervention = policyMap.get(serviceType).getIntervention();
-		collectGoal = policyMap.get(serviceType).getDecomposedGoals().get((int)modelRunner.schedule.getTime());
+		collectGoal = policyMap.get(serviceType).getDecomposedGoals().get((int) modelRunner.schedule.getTime());
 		collectUnprotectedProportion = (double) (unProtectedSet.size())
 				/ (double) (modelRunner.getState(CellSet.class).size());
 	}
@@ -258,6 +255,6 @@ public class ProtectionMaker implements ModelState {
 	@Override
 	public void toSchedule() {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

@@ -10,27 +10,26 @@ import modelRunner.ModelRunner;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 
-public class UtilityUpdater extends AbstractUpdater{
+public class UtilityUpdater extends AbstractUpdater {
 
 	@Override
 	public void step(SimState arg0) {
 		modelRunner.getState(DataCenter.class).updateUtility();
-	//	System.out.println("running");
-		System.out.println(modelRunner.getState(DataCenter.class).AFTCounter);
-		
+		// System.out.println("running");
+	//	System.out.println(modelRunner.getState(DataCenter.class).AFTCounter);
+
 	}
 
 	@Override
 	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
-		
-	}
 
+	}
 
 	@Override
 	public void toSchedule() {
 		modelRunner.schedule.scheduleRepeating(0, modelRunner.indexOf(this), this, 1.0);
-		
+
 	}
 
 }

@@ -1,6 +1,5 @@
 package crafty;
 
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,7 +17,7 @@ import tech.tablesaw.api.Row;
 import tech.tablesaw.api.Table;
 
 // This class is not abtract enough. It should be made more abstract later.
-public class DataCenter implements ModelState{//, Steppable{
+public class DataCenter implements ModelState {// , Steppable{
 
 	private HashMap<String, Manager> agentTypeMap = new HashMap<>();
 	private CellSet cellSet = new CellSet();
@@ -93,25 +92,24 @@ public class DataCenter implements ModelState{//, Steppable{
 		File anualCapitalFileDir = new File(anualCapitalFilePath);
 		this.anualCapitalFileIterator = Arrays.stream(anualCapitalFileDir.listFiles()).iterator();
 		loadAnualDemandDataToIterator(anualDemandFile);
-		
+
 		System.out.println(AFTCounter.keySet());
 	}
 
-
-
 	private void prepareSerivceNames(String serviceNameFile) {
-	    try {
-	        Table serviceNameTable = Table.read().csv(serviceNameFile);
-	        serviceNameList = serviceNameTable.stringColumn("Name").asList();
-	        int tableLength = serviceNameTable.rowCount();
-	        for (int i = 0; i < tableLength; i++) {
-	            String keyString = serviceNameTable.stringColumn("Name").getString(i);
-	            int index = serviceNameTable.intColumn("Index").get(i);
-	            serviceNameIndexMap.put(keyString, index);
-	        }
-	    } catch (Exception e) {
-	        JOptionPane.showMessageDialog(null, "Error reading the file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-	    }
+		try {
+			Table serviceNameTable = Table.read().csv(serviceNameFile);
+			serviceNameList = serviceNameTable.stringColumn("Name").asList();
+			int tableLength = serviceNameTable.rowCount();
+			for (int i = 0; i < tableLength; i++) {
+				String keyString = serviceNameTable.stringColumn("Name").getString(i);
+				int index = serviceNameTable.intColumn("Index").get(i);
+				serviceNameIndexMap.put(keyString, index);
+			}
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "Error reading the file: " + e.getMessage(), "Error",
+					JOptionPane.ERROR_MESSAGE);
+		}
 //		Table serviceNameTable = Table.read().csv(serviceNameFile);
 //		serviceNameList = serviceNameTable.stringColumn("Name").asList();
 //		int tableLength = serviceNameTable.rowCount();
@@ -138,7 +136,7 @@ public class DataCenter implements ModelState{//, Steppable{
 			manager.setSensitivityTable(agentTable);
 			manager.setRepresentative(true);
 			agentTypeMap.put(agentTable.name(), manager);
-			AFTCounter.put(agentTable.name(),0);
+			AFTCounter.put(agentTable.name(), 0);
 			managerSet.add(manager);
 
 			// Convert table into hashmap for improving calculation performance.
@@ -163,7 +161,7 @@ public class DataCenter implements ModelState{//, Steppable{
 			LandCell landCell = new LandCell();
 			landCell.setInformationTable(table.row(i));
 
-		//	landCell.initializeCapitalFilter();
+			// landCell.initializeCapitalFilter();
 			landCell.initializeProductionFilter(this);
 
 			cellSet.add(landCell);
@@ -181,7 +179,7 @@ public class DataCenter implements ModelState{//, Steppable{
 			mapWidth = Math.max(mapWidth, x);// this variable is for map visualization
 			mapHeight = Math.max(mapHeight, y);// this variable is for map visualization
 			manager.setId(i);
-			AFTCounter.put(managerTypeString, AFTCounter.get(managerTypeString)+1);
+			AFTCounter.put(managerTypeString, AFTCounter.get(managerTypeString) + 1);
 		}
 	}
 
@@ -216,7 +214,6 @@ public class DataCenter implements ModelState{//, Steppable{
 			currentStrategy.put(serviceName, 1.0);
 		});
 	}
-
 
 	private void refreshGlobalProductionMap() {
 		serviceNameList.forEach(serviceName -> {
@@ -270,9 +267,10 @@ public class DataCenter implements ModelState{//, Steppable{
 	public void updateUtility() {
 		serviceNameList.forEach(serviceName -> {
 			utitlityMap.put(serviceName, (anualDemandMap.get(serviceName) - globalProductionMap.get(serviceName)));
-					/// globalProductionMap.get(serviceName));
+			/// globalProductionMap.get(serviceName));
 		});
-	//	System.out.println("Utility updated: ---->> "+ modelRunner.schedule.getSteps() + " ----->>"  + utitlityMap.get("Meat"));
+		// System.out.println("Utility updated: ---->> "+
+		// modelRunner.schedule.getSteps() + " ----->>" + utitlityMap.get("Meat"));
 	}
 
 	public void updateCurrentStrategy(int ticks) {
@@ -348,10 +346,10 @@ public class DataCenter implements ModelState{//, Steppable{
 	public Map<String, Double> getInitSupplyMap() {
 		return initSupplyMap;
 	}
+
 	public int getTime() {
 		return time;
 	}
-
 
 	@Override
 	public void toSchedule() {

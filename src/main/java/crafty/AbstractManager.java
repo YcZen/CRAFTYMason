@@ -1,6 +1,5 @@
 package crafty;
 
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,7 +43,6 @@ public abstract class AbstractManager extends AbstractUpdater {
 
 	}
 
-
 	protected abstract void managerProduce();
 
 	protected abstract void managerAbandon();
@@ -52,7 +50,6 @@ public abstract class AbstractManager extends AbstractUpdater {
 	protected abstract void managerSearch();
 
 	protected abstract void managerCompete();
-
 
 	public String getManagerType() {
 		return managerType;
