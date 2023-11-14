@@ -50,7 +50,7 @@ public class LLMRunner extends ModelRunner {
 		stateManager.add(dataCenter.getManagerSet());
 		stateManager.add(new SupplyUpdater());
 
-		stateManager.add(new AIInstitution());
+	//	stateManager.add(new AIInstitution());
 		
 		stateManager.add(new MapUpdater());
 		stateManager.add(new GridOfCharts());

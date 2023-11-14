@@ -46,11 +46,13 @@
 			<version>LATEST</version>
 		</dependency>
 
-<dependency>
+<!-- add this dependency might cause version conflicts with the mason's jfree version, 
+resulting in relection error when inpecting charts-->
+<!-- <dependency>  
     <groupId>org.jfree</groupId>
     <artifactId>jfreechart</artifactId>
     <version>1.5.4</version>
-</dependency>
+</dependency>-->
 
 <dependency>
     <groupId>mason</groupId>

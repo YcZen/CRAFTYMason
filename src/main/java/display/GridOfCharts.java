@@ -74,7 +74,7 @@ public class GridOfCharts implements ModelState, Steppable {
 			// Make lines thicker
 			XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
 			BasicStroke thickStroke = new BasicStroke(2.0f);
-			renderer.setDefaultStroke(thickStroke);
+			renderer.setBaseStroke(thickStroke);
 
 			frame.add(new ChartPanel(chart));
 		}
