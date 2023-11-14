@@ -22,7 +22,7 @@ public class MapUpdater extends AbstractUpdater {
 	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
 		this.landMap = modelRunner.landMap;
-		this.cellSet = modelRunner.getState(CellSet.class);
+		this.cellSet = modelRunner.getState(DataCenter.class).getCellSet();
 		Set<String> typeSet = modelRunner.getState(DataCenter.class).getAgentTypeMap().keySet();
 		int i = 0;
 		for (String typeString : typeSet) {

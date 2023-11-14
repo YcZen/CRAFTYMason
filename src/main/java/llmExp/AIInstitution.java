@@ -1,0 +1,188 @@
+package llmExp;
+
+import java.util.List;
+
+import crafty.DataCenter;
+import institution.AbstractInstitution;
+import institution.InformCollector;
+import institution.Policy;
+import institution.PolicyType;
+import modelRunner.AbstractModelRunner;
+import py4j.GatewayServer;
+import sim.engine.SimState;
+
+public class AIInstitution extends AbstractInstitution {
+
+	InformCollector demandCollector;
+	InformCollector supplyCollector;
+	String averageErrors = "";
+	String actionHistory = "0";
+	double initialMeatSupply;
+	AgentEntry agentEntry;
+
+	@Override
+	public void setup(AbstractModelRunner modelRunner) {
+		this.modelRunner = modelRunner;
+
+	}
+
+	@Override
+	public void toSchedule() {
+		modelRunner.schedule.scheduleRepeating(0, modelRunner.indexOf(this), this, 1.0);
+
+	}
+
+	@Override
+	public void step(SimState arg0) {
+		// System.out.println("Institution step");
+		if (modelRunner.schedule.getTime() == 0) {
+			initialize();
+		}
+
+		collectInformation();
+		predict();
+		policyEvaluation();
+		policyAdaptation();
+		budgetUpdate();
+		resourceAllocation();
+		// implementPolicy(); // this method is exectued in utilityUpdater
+		updatePolicyHistory();
+
+	}
+
+	@Override
+	protected void initialize() {
+
+		// Initialize GatewayServer and AgentEntry
+		GatewayServer.turnLoggingOff();
+		GatewayServer server = new GatewayServer();
+		server.start();
+		agentEntry = (AgentEntry) server.getPythonServerEntryPoint(new Class[] { AgentEntry.class });
+
+		initialMeatSupply = modelRunner.getState(DataCenter.class).getInitSupplyMap().get("Meat");
+
+		Policy policy = new Policy.Builder().policyName("decrease meat").type(PolicyType.ECO)
+				.goal(((LLMRunner) modelRunner).getMeatGoal() * initialMeatSupply).initialGuess(1000000.).inertia(1)
+				.policyLag(((LLMRunner) modelRunner).getMeatLag()).targetService("Meat").build();
+		this.register(policy);
+
+		supplyCollector = new InformCollector("Meat");
+	}
+
+	@Override
+	protected void collectInformation() {
+		supplyCollector.collect("Meat", modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Meat"));
+		
+	}
+
+	@Override
+	protected void predict() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void policyEvaluation() {
+		policyMap.values().forEach(policy -> {
+			List<Double> historicalSupply = supplyCollector.get(policy.getTargetService());
+			if (historicalSupply.size() >= policy.getPolicyLag()
+					& historicalSupply.size() % policy.getPolicyLag() == 0) {
+				policy.setStartChanging(true);
+			} else {
+				policy.setStartChanging(false);
+			}
+			if (policy.isStartChanging()) {
+				int start = historicalSupply.size() - policy.getPolicyLag();
+				int end = historicalSupply.size();
+				List<Double> recentSupply = historicalSupply.subList(start, end);
+				double averageGap = 0;
+				for (int i = 0; i < policy.getPolicyLag(); i++) {
+					averageGap = averageGap + (policy.getGoal() - recentSupply.get(i)) / policy.getGoal();
+				}
+				averageGap = averageGap / policy.getPolicyLag();
+
+				policy.setEvluation(averageGap);
+			}
+		});
+
+	}
+
+	@Override
+	protected void policyAdaptation() {
+		policyMap.values().forEach(policy -> {
+
+			if (policy.isStartChanging()) {
+
+				String avg_err = doubleToPercentage(policy.getEvluation());
+				if (averageErrors == "") {
+					averageErrors = avg_err;
+				} else {
+					averageErrors = averageErrors + ", " + avg_err;
+				}
+
+				int response = agentEntry.agentRun(actionHistory, averageErrors);
+				double incrementalIntervention = ((double) response) / 10.0;
+
+				double interventionModifier = policy.getInterventionModifier();
+
+				policy.setInterventionModifier(incrementalIntervention + interventionModifier);
+
+				policy.updateIntervention();
+
+				String currentAction = String.format("%+d", response);
+				actionHistory = actionHistory + ", " + currentAction;
+				System.out.println("averageErrors: " + averageErrors + "; response: " + response + "; increment: "
+						+ incrementalIntervention);
+				System.out.println("Meat supply: " + supplyCollector.get("Meat"));
+			}
+		});
+	}
+
+	@Override
+	protected void budgetUpdate() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void resourceAllocation() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void implementPolicy() {
+		policyMap.values().forEach(policy -> {
+			if (policy.getType() == PolicyType.TAX || policy.getType() == PolicyType.SUBSIDY
+					|| policy.getType() == PolicyType.ECO) {
+				double utility = modelRunner.getState(DataCenter.class).getUtitlityMap().get(policy.getTargetService());
+				utility = utility - policy.getIntervention();
+				modelRunner.getState(DataCenter.class).getUtitlityMap().put(policy.getTargetService(), utility);
+			}
+		});
+		// System.out.println("Policy implemented ---->> " +
+		// modelRunner.schedule.getSteps() + " ----->>" +
+		// modelRunner.getState(DataCenter.class).getUtitlityMap().get("Meat"));
+
+	}
+
+	@Override
+	public void updatePolicyHistory() {
+		policyMap.values().forEach(policy -> {
+			policy.updatePolicyHistory();
+		});
+	}
+
+	@Override
+	protected void fuzzyPrepare() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public String doubleToPercentage(double value) {
+		// Multiplying the value by 100 and formatting it as a string with a percentage
+		// sign
+		return String.format("%.0f%%", value * 100);
+	}
+
+}

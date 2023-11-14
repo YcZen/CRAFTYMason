@@ -6,8 +6,10 @@ import java.util.HashSet;
 
 import modelRunner.AbstractModelRunner;
 import modelRunner.ModelRunner;
+import sim.engine.SimState;
+import sim.engine.Steppable;
 
-public class CellSet extends HashSet<AbstractCell> implements ModelState {
+public class CellSet extends HashSet<AbstractCell> {
 
 	private HashMap<String, AbstractCell> cellHashMap = new HashMap<>();
 
@@ -27,21 +29,10 @@ public class CellSet extends HashSet<AbstractCell> implements ModelState {
 		return false;
 	}
 
-	@Override
-	public void setup(AbstractModelRunner modelRunner) {
-		this.forEach(cell -> {
-			cell.setup(modelRunner);
-		});
-	}
 
 	public HashMap<String, AbstractCell> getCellHashMap() {
 		return cellHashMap;
 	}
 
-	@Override
-	public void toSchedule() {
-		// TODO Auto-generated method stub
-
-	}
 
 }

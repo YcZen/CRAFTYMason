@@ -22,7 +22,7 @@ public class AgriInstitution extends AbstractInstitution {
 	public void initialize() {
 
 		fuzzyPrepare();
-		Policy policy = new Policy.Builder().policyName("decrease meat").type(PolicyType.TAX)
+		Policy policy = new Policy.Builder().policyName("decrease meat").type(PolicyType.ECO)
 				// .type(PolicyType.ECO)
 				.goal(((Intra) modelRunner).getMeatGoal()
 						* modelRunner.getState(DataCenter.class).getInitSupplyMap().get("Meat"))
@@ -33,12 +33,12 @@ public class AgriInstitution extends AbstractInstitution {
 		this.register(policy);
 
 		policy = new Policy.Builder().policyName("increase crop").type(PolicyType.SUBSIDY)
-				// .type(PolicyType.ECO)
+				 .type(PolicyType.ECO)
 				.goal(((Intra) modelRunner).getCropGoal()
 						* modelRunner.getState(DataCenter.class).getInitSupplyMap().get("Crops"))
 				.initialGuess(1000000.).inertia(0.2).policyLag(((Intra) modelRunner).getCropLag())
 				.targetService("Crops").build();
-		this.register(policy);
+	//	this.register(policy);
 
 		demandCollector = new InformCollector("Meat", "Crops");
 		supplyCollector = new InformCollector("Meat", "Crops");
@@ -107,8 +107,8 @@ public class AgriInstitution extends AbstractInstitution {
 //				double incrementalIntervention = Math.abs( policy.getInertia())<Math.abs( policy.getEvluation())? Math.abs( policy.getEvluation())/policy.getEvluation()*policy.getInertia():policy.getEvluation();//(policy.getInertia()<functionBlock.getVariable("intervention").getValue())? policy.getInertia(): functionBlock.getVariable("intervention").getValue();
 //				policy.setInterventionModifier(incrementalIntervention + interventionModifier);
 				policy.updateIntervention();
-//				System.out.println(
-//						"average gap: " + policy.getEvluation() + "; intervention: " + policy.getIntervention());// +
+				System.out.println(
+						"average gap: " + policy.getEvluation() + "; intervention: " + policy.getIntervention() + "; modifier: " + policy.getInterventionModifier());// +
 																													// functionBlock.getVariable("intervention").getValue());
 			}
 		});
@@ -133,7 +133,7 @@ public class AgriInstitution extends AbstractInstitution {
 		});
 
 		String[] agriProductionList = { "Meat", "Crops" };
-		double proportion = 2.0;
+		double proportion = 1;
 		for (String production : agriProductionList) {
 			totalBugdet += (proportion
 					* modelRunner.getState(DataCenter.class).getGlobalProductionMap().get(production));
@@ -152,7 +152,8 @@ public class AgriInstitution extends AbstractInstitution {
 					|| (policy.getType() == PolicyType.ECO && policy.getIntervention() > 0)) {
 				double intervention = policy.getIntervention();
 				intervention = (intervention < totalBugdet) ? intervention : totalBugdet;
-				policy.setIntervention(intervention);
+				policy.setIntervention(intervention);	
+				//policy.setInterventionModifier(intervention/policy.getInitialGuess()); //set the modifier to the actual value
 				totalBugdet += -intervention;
 			}
 		});

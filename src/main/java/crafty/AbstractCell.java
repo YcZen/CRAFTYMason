@@ -5,8 +5,9 @@ import java.util.HashSet;
 
 import tech.tablesaw.api.Row;
 import tech.tablesaw.api.Table;
+import updaters.AbstractUpdater;
 
-public abstract class AbstractCell implements ModelState {
+public abstract class AbstractCell {
 	protected Row cellData;
 	protected Table cellServiceTable;
 	protected Manager owner;
@@ -60,7 +61,7 @@ public abstract class AbstractCell implements ModelState {
 
 	public abstract void initializeNeighborSet(CellSet cellSet);
 
-	public abstract void calculateProtectionIndex();
+	public abstract double calculateProtectionIndex();
 
 	public boolean isProtected() {
 		return isProtected;

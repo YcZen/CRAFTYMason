@@ -12,6 +12,10 @@ import tech.tablesaw.api.Table;
 import updaters.AbstractUpdater;
 
 public abstract class AbstractManager extends AbstractUpdater {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected AbstractModelRunner modelRunner;
 	protected String managerType;
 	protected int id;

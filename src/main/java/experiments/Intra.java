@@ -7,6 +7,7 @@ import display.GridOfCharts;
 import institution.AgriInstitution;
 import institution.NatureInstitution;
 import modelRunner.ModelRunner;
+import net.sourceforge.jFuzzyLogic.fcl.FclParser.declaration_return;
 import updaters.CapitalUpdater;
 import updaters.DemandUpdater;
 import updaters.InfluencedUtilityUpdater;
@@ -17,13 +18,16 @@ import updaters.SupplyUpdater;
 public class Intra extends ModelRunner {
 
 ////////////Experimental parameters///////////////////
-	private double meatGoal = 1;
+	private double meatGoal = 2.5;
 	private double cropGoal = 4;
-	private double divGoal = 5;
-	private double limit = 0.7;
+	private double divGoal = 2;
+	private double limit = 0.66;
 	private int policyLag = 5;
-	private int meatLag = 1;
-	private int cropLag = 1;
+	private int meatLag = 5;
+	private int cropLag = 5;
+	private double paInertia = 0.1;
+	protected double threshold = 0.3;
+	protected int endYearProtc = 0;
 
 	public Intra(long seed) {
 		super(seed);
@@ -42,15 +46,13 @@ public class Intra extends ModelRunner {
 		stateManager.add(new SupplyInitializer());
 		stateManager.add(new CapitalUpdater());
 		stateManager.add(new DemandUpdater());
-		// stateManager.add(new UtilityUpdater());
 		stateManager.add(new InfluencedUtilityUpdater());
 		stateManager.add(dataCenter.getManagerSet());
-		stateManager.add(dataCenter.getCellSet());
 		stateManager.add(new SupplyUpdater());
 
-		stateManager.add(new AgriInstitution());
+	//	stateManager.add(new AgriInstitution());
 		stateManager.add(new NatureInstitution());
-//		stateManager.add(new MapUpdater());
+	//	stateManager.add(new MapUpdater());
 	//	stateManager.add(new GridOfCharts());
 	}
 
@@ -359,10 +361,20 @@ public class Intra extends ModelRunner {
 		this.cropLag = cropLag;
 	}
 
-	@Override
-	public double[] assess(int numObjectives) {
-		return null;
+	public double getPaInertia() {
+		return paInertia;
+	}
 
+	public void setPaInertia(double paInertia) {
+		this.paInertia = paInertia;
+	}
+
+	public int getEndYearProtc() {
+		return endYearProtc;
+	}
+
+	public void setEndYearProtc(int endYearProtc) {
+		this.endYearProtc = endYearProtc;
 	}
 
 }

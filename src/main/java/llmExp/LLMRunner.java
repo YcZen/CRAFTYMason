@@ -1,11 +1,8 @@
-package experiments;
+package llmExp;
 
 import java.util.HashMap;
-
 import crafty.DataCenter;
 import display.GridOfCharts;
-import institution.AgriInstitution;
-import institution.NatureInstitution;
 import modelRunner.ModelRunner;
 import updaters.CapitalUpdater;
 import updaters.DemandUpdater;
@@ -14,18 +11,31 @@ import updaters.MapUpdater;
 import updaters.SupplyInitializer;
 import updaters.SupplyUpdater;
 
-public class IndividualPolicies extends ModelRunner {
+public class LLMRunner extends ModelRunner {
 
-////////////Experimental parameters///////////////////
-	protected double goal;
+/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	////////////Experimental parameters///////////////////
+	private double meatGoal = 1;
+	private double cropGoal = 4;
+	private double divGoal = 2;
+	private double limit = 0.66;
+	private int policyLag = 5;
+	private int meatLag = 5;
+	private int cropLag = 5;
+	private double paInertia = 0.1;
+	protected double threshold = 0.3;
+	protected int endYearProtc = 0;
 
-	public IndividualPolicies(long seed) {
+	public LLMRunner(long seed) {
 		super(seed);
 		loadStateManager();
 	}
 
 	public static void main(String[] args) {
-		doLoop(IndividualPolicies.class, args);
+		doLoop(LLMRunner.class, args);
 		System.exit(0);
 	}
 
@@ -36,14 +46,13 @@ public class IndividualPolicies extends ModelRunner {
 		stateManager.add(new SupplyInitializer());
 		stateManager.add(new CapitalUpdater());
 		stateManager.add(new DemandUpdater());
-		// stateManager.add(new UtilityUpdater());
 		stateManager.add(new InfluencedUtilityUpdater());
 		stateManager.add(dataCenter.getManagerSet());
 		stateManager.add(new SupplyUpdater());
 
-		stateManager.add(new AgriInstitution());
-//		stateManager.add(new NatureInstitution());
-//		stateManager.add(new MapUpdater());
+		stateManager.add(new AIInstitution());
+		
+		stateManager.add(new MapUpdater());
 		stateManager.add(new GridOfCharts());
 	}
 
@@ -286,16 +295,86 @@ public class IndividualPolicies extends ModelRunner {
 		this.anualDemandFile = anualDemandFile;
 	}
 
-	public void setGoal(double goal) {
+	public void setMeatGoal(double meatGoal) {
 
-		this.goal = goal;
+		this.meatGoal = meatGoal;
 
 	}
 
-	public double getGoal() {
+	public double getMeatGoal() {
 
-		return goal;
+		return meatGoal;
 
+	}
+
+	public void setCropGoal(double cropGoal) {
+
+		this.cropGoal = cropGoal;
+
+	}
+
+	public double getCropGoal() {
+
+		return cropGoal;
+
+	}
+
+	public void setUnprotectionLimit(double limit) {
+		this.limit = limit;
+	}
+
+	public double getUnprotectionLimit() {
+		return limit;
+	}
+
+	public int getPolicyLag() {
+		return policyLag;
+	}
+
+	public void setPolicyLag(int policyLag) {
+		this.policyLag = policyLag;
+	}
+
+	public double getDivGoal() {
+		return divGoal;
+	}
+
+	public void setDivGoal(double divGoal) {
+		this.divGoal = divGoal;
+	}
+
+	public int getMeatLag() {
+
+		return meatLag;
+	}
+
+	public void setMeatLag(int meatLag) {
+		this.meatLag = meatLag;
+	}
+
+	public int getCropLag() {
+		// TODO Auto-generated method stub
+		return cropLag;
+	}
+
+	public void setCropLag(int cropLag) {
+		this.cropLag = cropLag;
+	}
+
+	public double getPaInertia() {
+		return paInertia;
+	}
+
+	public void setPaInertia(double paInertia) {
+		this.paInertia = paInertia;
+	}
+
+	public int getEndYearProtc() {
+		return endYearProtc;
+	}
+
+	public void setEndYearProtc(int endYearProtc) {
+		this.endYearProtc = endYearProtc;
 	}
 
 }

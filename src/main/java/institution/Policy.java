@@ -166,4 +166,9 @@ public class Policy {
 
 	}
 
+	public double getInitialGuess() {
+		// TODO Auto-generated method stub
+		return initialguess;
+	}
+
 }

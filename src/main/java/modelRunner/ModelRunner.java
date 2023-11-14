@@ -49,6 +49,7 @@ public class ModelRunner extends AbstractModelRunner {
 
 	}
 
+@Override
 	public void loadStateManager() {
 		DataCenter dataCenter = new DataCenter(serviceNameFile, capitalNameFile, agentFilePath, baselineMapFilePath,
 				anualCapitalFilePath, anualDemandFile);
@@ -59,7 +60,7 @@ public class ModelRunner extends AbstractModelRunner {
 		// stateManager.add(new UtilityUpdater());
 		stateManager.add(new InfluencedUtilityUpdater());
 		stateManager.add(dataCenter.getManagerSet());
-		stateManager.add(dataCenter.getCellSet());
+	//	stateManager.add(dataCenter.getCellSet());
 		stateManager.add(new SupplyUpdater());
 
 		stateManager.add(new AgriInstitution());

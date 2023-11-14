@@ -5,6 +5,7 @@ import java.util.Set;
 
 import modelRunner.AbstractModelRunner;
 import modelRunner.ModelRunner;
+import sim.engine.SimState;
 
 public class LandCell extends AbstractCell {
 // Super class variables;
@@ -21,14 +22,14 @@ public class LandCell extends AbstractCell {
 		this.owner = owner;
 	}
 
-	@Override
-	public void setup(AbstractModelRunner modelRunner) {
-//		initializeCapitalFilter();
-//		initializeProductionFilter();
-		this.modelRunner = modelRunner;
-//		initializeNeighborSet(modelRunner.getState(CellSet.class));
-
-	}
+//	@Override
+//	public void setup(AbstractModelRunner modelRunner) {
+////		initializeCapitalFilter();
+////		initializeProductionFilter();
+//		this.modelRunner = modelRunner;
+////		initializeNeighborSet(modelRunner.getState(CellSet.class));
+//
+//	}
 
 	@Override
 	public void initializeCapitalFilter() {
@@ -87,7 +88,7 @@ public class LandCell extends AbstractCell {
 	}
 
 	@Override
-	public void calculateProtectionIndex() {
+	public double calculateProtectionIndex() {
 //		HashMap<String, Double> tempHashMap = new HashMap<>();
 //		double filteredSum = 0.0;
 //		Set<String> capitalKeySet = capitalHashMap.keySet();
@@ -112,7 +113,9 @@ public class LandCell extends AbstractCell {
 //		}
 //		double neighborindex = 1.15;
 //		protectionIndex = giniImpurity * filteredSum * Math.pow(neighborindex, protectedNeighborcount);
-		protectionIndex = capitalHashMap.get("Diversity");
+		//protectionIndex = capitalHashMap.get("Diversity");
+		protectionIndex = capitalHashMap.get("Forest.productivity") + capitalHashMap.get("Grassland.productivity");
+		return protectionIndex;
 	}
 
 	public double getProtectionIndex() {
@@ -126,10 +129,16 @@ public class LandCell extends AbstractCell {
 
 	}
 
-	@Override
-	public void toSchedule() {
-		// TODO Auto-generated method stub
-
-	}
+//	@Override
+//	public void toSchedule() {
+//		// TODO Auto-generated method stub
+//
+//	}
+//
+//	@Override
+//	public void step(SimState arg0) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
 }

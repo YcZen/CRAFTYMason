@@ -151,7 +151,7 @@ public class Manager extends AbstractManager {
 	protected void managerSearch() {
 		// if (modelRunner.schedule.getTime() >= 1 && representative == true) {
 		if (representative == true) {
-			CellSet cellSet = modelRunner.getState(CellSet.class);
+			CellSet cellSet = modelRunner.getState(DataCenter.class).getCellSet();
 
 			// search searchedNumber of others' landcells to see if there is any cell can be
 			// occupied.

@@ -1,5 +1,6 @@
 package institution;
 
+import java.awt.print.Printable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,7 +50,7 @@ public class NatureInstitution extends AbstractInstitution {
 		predict();
 		policyEvaluation();
 		policyAdaptation();
-		budgetUpdate();
+	//	budgetUpdate();
 //		resourceAllocation();
 		// implementPolicy(); // this method is exectued in utilityUpdater
 		updatePolicyHistory();
@@ -64,17 +65,18 @@ public class NatureInstitution extends AbstractInstitution {
 				.initialGuess(10000.).inertia(0.2).policyLag(5).targetService("Diversity").build();
 		this.register(policy);
 
+		double paInertia = ((Intra) modelRunner).getPaInertia();
 		policy = new Policy.Builder().policyName("Protected areas").type(PolicyType.PROTECTION)
 				.goal(((Intra) modelRunner).getDivGoal()
 						* modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Diversity"))
-				.initialGuess(10000.).inertia(0.2).policyLag(((Intra) modelRunner).getPolicyLag())
+				.initialGuess(10000.).inertia(paInertia).policyLag(((Intra) modelRunner).getPolicyLag())
 				.targetService("Diversity").build();
 		this.register(policy);
 
 		demandCollector = new InformCollector("Diversity");
 		supplyCollector = new InformCollector("Diversity");
 
-		modelRunner.getState(CellSet.class).forEach(cell -> {
+		modelRunner.getState(DataCenter.class).getCellSet().forEach(cell -> {
 			if (cell.isProtected() == false) {
 				unProtectedSet.add(cell);
 			}
@@ -244,25 +246,24 @@ public class NatureInstitution extends AbstractInstitution {
 		policyMap.values().forEach(policy -> {
 			if (policy.getType() == PolicyType.PROTECTION && policy.isStartChanging() == true) {
 				double intervention = policy.getIntervention();
+				System.out.println(intervention);
 				int n = (int) intervention;
 				if (n < 0) {
 					n = 0;
 				}
-				// int n = (int) (unProtectedSet.size() * intervention);
-				// int n = (int) (unProtectedSet.size() * 0.3);
-
+				int totalOfCellsToProtect = (int) (modelRunner.getState(DataCenter.class).getCellSet().size() * (1 - ((Intra) modelRunner).getUnprotectionLimit()));
+				int numOfCellsToProtect = totalOfCellsToProtect - (modelRunner.getState(DataCenter.class).getCellSet().size() - unProtectedSet.size());
+				
 				List<AbstractCell> sortedList = new ArrayList<>(unProtectedSet);
-				Collections.sort(sortedList, (a, b) -> Double.compare(((LandCell) b).getProtectionIndex(),
-						((LandCell) a).getProtectionIndex()));
+				Collections.sort(sortedList, (a, b) -> Double.compare(((LandCell) b).calculateProtectionIndex(),
+						((LandCell) a).calculateProtectionIndex()));
 
-				List<AbstractCell> topN = sortedList.subList(0, Math.min(n, sortedList.size()));
-
-				if (unProtectedSet.size()
-						/ (double) (modelRunner.getState(CellSet.class).size()) <= ((Intra) modelRunner)
-								.getUnprotectionLimit()) {
-					topN = new ArrayList<AbstractCell>();
-					System.out.println("Protected area exceeds limit");
+				List<AbstractCell> topN = sortedList.subList(0, Math.min(n, numOfCellsToProtect));// sortedList.size()));
+				if (topN.size() != 0) {
+					((Intra) modelRunner).setEndYearProtc((int) modelRunner.schedule.getSteps());
+					//System.out.println(((Intra) modelRunner).getEndYearProtc());
 				}
+
 				// change the state of cells to protected and modify
 				// landCell.getProductionFilter()
 				topN.forEach(landCell -> {
@@ -288,12 +289,10 @@ public class NatureInstitution extends AbstractInstitution {
 
 				// Remove the selected LandCell instances from unProtectedSet
 				unProtectedSet.removeAll(topN);
-//				System.out.println("unProtected proportion:"
-//						+ (double) (unProtectedSet.size()) / (double) (modelRunner.getState(CellSet.class).size()));
-//				System.out.println("Protection intervention: " + policy.getIntervention());
 			}
 		});
-
+		System.out.println(unProtectedSet.size()
+						/ (double) (modelRunner.getState(DataCenter.class).getCellSet().size()));
 	}
 
 }
