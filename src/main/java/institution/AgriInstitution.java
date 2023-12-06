@@ -1,5 +1,6 @@
 package institution;
 
+import java.util.ArrayList;
 import java.util.List;
 import crafty.DataCenter;
 import experiments.Intra;
@@ -17,6 +18,8 @@ public class AgriInstitution extends AbstractInstitution {
 	private FunctionBlock fuzzyTax;
 	private FunctionBlock fuzzySubsidy;
 	private FunctionBlock fuzzyECO;
+	private ArrayList<Double> averageGapList = new ArrayList<>();
+	private ArrayList<Double> incrementalList = new ArrayList<>();
 
 	@Override
 	public void initialize() {
@@ -28,7 +31,7 @@ public class AgriInstitution extends AbstractInstitution {
 						* modelRunner.getState(DataCenter.class).getInitSupplyMap().get("Meat"))
 				// .goal(5 *
 				// modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Meat"))
-				.initialGuess(1000000.).inertia(0.2).policyLag(((Intra) modelRunner).getMeatLag())
+				.initialGuess(1000000.).inertia(0.12).policyLag(((Intra) modelRunner).getMeatLag())
 				.targetService("Meat").build();
 		this.register(policy);
 
@@ -109,8 +112,12 @@ public class AgriInstitution extends AbstractInstitution {
 				policy.updateIntervention();
 				System.out.println(
 						"average gap: " + policy.getEvluation() + "; intervention: " + policy.getIntervention() + "; modifier: " + policy.getInterventionModifier());// +
-																													// functionBlock.getVariable("intervention").getValue());
+				averageGapList.add(policy.getEvluation());																								// functionBlock.getVariable("intervention").getValue());
+				incrementalList.add(incrementalIntervention);
+				System.out.println("Gaps: " + averageGapList);
+				System.out.println("Incre: " + incrementalList);
 			}
+			
 		});
 	}
 

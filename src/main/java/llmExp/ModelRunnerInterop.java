@@ -1,11 +1,12 @@
-package experiments;
+package llmExp;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import crafty.DataCenter;
+import crafty.ModelState;
 import display.GridOfCharts;
-import institution.AgriInstitution;
-import institution.NatureInstitution;
 import modelRunner.ModelRunner;
 import net.sourceforge.jFuzzyLogic.fcl.FclParser.declaration_return;
 import updaters.CapitalUpdater;
@@ -14,10 +15,16 @@ import updaters.InfluencedUtilityUpdater;
 import updaters.MapUpdater;
 import updaters.SupplyInitializer;
 import updaters.SupplyUpdater;
+import sim.engine.SimState;
 
-public class Intra extends ModelRunner {
 
-////////////Experimental parameters///////////////////
+public class ModelRunnerInterop extends ModelRunner {
+
+/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	////////////Experimental parameters///////////////////
 	private double meatGoal = 1;
 	private double cropGoal = 4;
 	private double divGoal = 2;
@@ -28,15 +35,30 @@ public class Intra extends ModelRunner {
 	private double paInertia = 0.1;
 	protected double threshold = 0.3;
 	protected int endYearProtc = 0;
+	private List<Integer> actions;
 
-	public Intra(long seed) {
+	public ModelRunnerInterop(long seed) {
 		super(seed);
 		loadStateManager();
 	}
 
 	public static void main(String[] args) {
-		doLoop(Intra.class, args);
-		System.exit(0);
+//		doLoop(ModelRunnerInterop.class, args);
+		
+		SimState state = new ModelRunnerInterop(System.currentTimeMillis());
+		List<Integer> actionList = new ArrayList<Integer>();
+		for (int i = 0; i < 20; i++) {
+		    actionList.add(0);
+		}
+		((ModelRunnerInterop) state).setActions(actionList.toString());
+		state.start();
+		do
+		if (!state.schedule.step(state)) break;
+		while(state.schedule.getSteps() < 20);
+		state.finish();
+		System.out.println("afsdafsdf ");//("AverageErrorList:"+((ModelRunnerInterop) state).getState(InstitutionInterop.class).getAverageArrayList());
+//		System.exit(0);
+	//	((ModelRunnerInterop) state).run(110);
 	}
 
 	public void loadStateManager() {
@@ -50,10 +72,25 @@ public class Intra extends ModelRunner {
 		stateManager.add(dataCenter.getManagerSet());
 		stateManager.add(new SupplyUpdater());
 
-		stateManager.add(new AgriInstitution());
-		//stateManager.add(new NatureInstitution());
-		stateManager.add(new MapUpdater());
+		stateManager.add(new InstitutionInterop());
+		
+//		stateManager.add(new MapUpdater());
 		stateManager.add(new GridOfCharts());
+	}
+
+	public String run(Integer totalSteps) {
+		start();
+		do {
+			if (!schedule.step(this)) break;
+		}
+		while(schedule.getSteps() < totalSteps);
+		finish();
+		return (getState(InstitutionInterop.class).getAverageArrayList()).toString();
+	}
+	
+	public void runExit() {
+		//System.exit(0);
+		//System.gc();
 	}
 
 // Getters
@@ -376,5 +413,31 @@ public class Intra extends ModelRunner {
 	public void setEndYearProtc(int endYearProtc) {
 		this.endYearProtc = endYearProtc;
 	}
+	
+	public void setActions(String actions) {
+		this.actions = stringToArrayList(actions);
+	}
+	
+	public List<Integer> getActions() {
+		return actions;
+	}
+	
+	public ArrayList<Integer> stringToArrayList(String str) {
+        // Remove the brackets and trim to avoid leading and trailing spaces
+        str = str.substring(1, str.length() - 1).trim();
+
+        // Split the string into an array of strings
+        String[] stringNumbers = str.split("\\s*,\\s*");
+
+        // Create an ArrayList
+        ArrayList<Integer> numbers = new ArrayList<>();
+
+        // Parse and add each number to the ArrayList
+        for (String number : stringNumbers) {
+            numbers.add(Integer.parseInt(number));
+        }
+
+        return numbers;
+    }
 
 }

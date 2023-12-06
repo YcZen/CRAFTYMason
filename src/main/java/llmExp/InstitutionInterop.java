@@ -14,7 +14,7 @@ import modelRunner.AbstractModelRunner;
 import py4j.GatewayServer;
 import sim.engine.SimState;
 
-public class AIInstitution extends AbstractInstitution {
+public class InstitutionInterop extends AbstractInstitution {
 
 	InformCollector demandCollector;
 	InformCollector supplyCollector;
@@ -22,8 +22,12 @@ public class AIInstitution extends AbstractInstitution {
 	String actionHistory = "0";
 	double initialMeatSupply;
 	AgentEntry agentEntry;
+	private List<Integer> actions;
 //	String meatSupply;
 //	String meatDemand;
+	int index = 0;
+	ArrayList<Double> averageArrayList = new ArrayList<Double>();
+	int response = 0;;
 
 	@Override
 	public void setup(AbstractModelRunner modelRunner) {
@@ -58,17 +62,13 @@ public class AIInstitution extends AbstractInstitution {
 	@Override
 	protected void initialize() {
 
-		// Initialize GatewayServer and AgentEntry
-		GatewayServer.turnLoggingOff();
-		GatewayServer server = new GatewayServer();
-		server.start();
-		agentEntry = (AgentEntry) server.getPythonServerEntryPoint(new Class[] { AgentEntry.class });
+		setActions(((ModelRunnerInterop) modelRunner).getActions());
 
 		initialMeatSupply = modelRunner.getState(DataCenter.class).getInitSupplyMap().get("Meat");
 
 		Policy policy = new Policy.Builder().policyName("decrease meat").type(PolicyType.ECO)
-				.goal(((LLMRunner) modelRunner).getMeatGoal() * initialMeatSupply).initialGuess(1000000.).inertia(1)
-				.policyLag(((LLMRunner) modelRunner).getMeatLag()).targetService("Meat").build();
+				.goal(((ModelRunnerInterop) modelRunner).getMeatGoal() * initialMeatSupply).initialGuess(1000000.).inertia(1)
+				.policyLag(((ModelRunnerInterop) modelRunner).getMeatLag()).targetService("Meat").build();
 		this.register(policy);
 
 		supplyCollector = new InformCollector("Meat");
@@ -108,6 +108,7 @@ public class AIInstitution extends AbstractInstitution {
 				averageGap = averageGap / policy.getPolicyLag();
 
 				policy.setEvluation(averageGap);
+				averageArrayList.add(averageGap);
 			}
 		});
 
@@ -130,9 +131,14 @@ public class AIInstitution extends AbstractInstitution {
 //				int response = agentEntry.agentRun(actionHistory, averageErrors);
 				
 				//======>For role-playing
-				String meatDemand = averageEveryFive(demandCollector.get("Meat"),initialMeatSupply);
-				String meatSupply = averageEveryFive(supplyCollector.get("Meat"), initialMeatSupply);
-				int response = agentEntry.agentRun(actionHistory, meatDemand, meatSupply);
+//				String meatDemand = averageEveryFive(demandCollector.get("Meat"),initialMeatSupply);
+//				String meatSupply = averageEveryFive(supplyCollector.get("Meat"), initialMeatSupply);
+//				int response = agentEntry.agentRun(actionHistory, meatDemand, meatSupply);
+				
+				if (index >= 0 && index < actions.size()) {
+				    response = actions.get(index);
+				    index += 1;
+				}
 				
 				double incrementalIntervention = ((double) response) / 10.0;
 
@@ -144,9 +150,10 @@ public class AIInstitution extends AbstractInstitution {
 
 				String currentAction = String.format("%+d", response);
 				actionHistory = actionHistory + ", " + currentAction;
-				System.out.println("averageErrors: " + averageErrors + "; response: " + response + "; increment: "
-						+ incrementalIntervention);
+//				System.out.println("averageErrors: " + averageErrors + "; response: " + response + "; increment: "
+//						+ incrementalIntervention);
 				System.out.println("Meat supply: " + supplyCollector.get("Meat"));
+				System.out.println("Meat demand: " + demandCollector.get("Meat"));
 			}
 		});
 	}
@@ -218,5 +225,12 @@ public class AIInstitution extends AbstractInstitution {
 
         return outputList.toString();
 	}
+	
+	public void setActions(List<Integer> actions) {
+		this.actions = actions;
+	}
 
+	public ArrayList<Double> getAverageArrayList() {
+		return averageArrayList;
+	}
 }
