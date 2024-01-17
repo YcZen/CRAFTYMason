@@ -128,11 +128,13 @@ public class AIInstitution extends AbstractInstitution {
 
 				//======>For individual institution
 //				int response = agentEntry.agentRun(actionHistory, averageErrors);
+				//----------------------------
 				
 				//======>For role-playing
 				String meatDemand = averageEveryFive(demandCollector.get("Meat"),initialMeatSupply);
 				String meatSupply = averageEveryFive(supplyCollector.get("Meat"), initialMeatSupply);
 				int response = agentEntry.agentRun(actionHistory, meatDemand, meatSupply);
+				//-----------------------------
 				
 				double incrementalIntervention = ((double) response) / 10.0;
 
