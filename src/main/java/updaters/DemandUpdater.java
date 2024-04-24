@@ -14,7 +14,7 @@ public class DemandUpdater extends AbstractUpdater {
 	@Override
 	public void step(SimState arg0) {
 		modelRunner.getState(DataCenter.class).updateDemand();
-		// System.out.println("Utility Updater step");
+	//	modelRunner.getState(DataCenter.class).getAnualDemand().put("Diversity", 1000000000.0);
 	}
 
 	@Override

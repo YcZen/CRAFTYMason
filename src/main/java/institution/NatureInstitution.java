@@ -19,14 +19,14 @@ import sim.engine.SimState;
 
 public class NatureInstitution extends AbstractInstitution {
 
-	private InformCollector supplyCollector;
-	private InformCollector demandCollector;
-	FunctionBlock functionBlock;
-	private FunctionBlock fuzzyTax;
-	private FunctionBlock fuzzySubsidy;
-	private FunctionBlock fuzzyECO;
-	private FunctionBlock fuzzyProect;
-	HashSet<AbstractCell> unProtectedSet = new HashSet<>();
+	protected InformCollector supplyCollector;
+	protected InformCollector demandCollector;
+	protected FunctionBlock functionBlock;
+	protected FunctionBlock fuzzyTax;
+	protected FunctionBlock fuzzySubsidy;
+	protected FunctionBlock fuzzyECO;
+	protected FunctionBlock fuzzyProect;
+	protected HashSet<AbstractCell> unProtectedSet = new HashSet<>();
 
 	@Override
 	public void setup(AbstractModelRunner modelRunner) {

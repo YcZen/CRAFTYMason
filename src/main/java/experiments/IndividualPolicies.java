@@ -42,7 +42,7 @@ public class IndividualPolicies extends ModelRunner {
 		stateManager.add(new SupplyUpdater());
 
 		stateManager.add(new AgriInstitution());
-//		stateManager.add(new NatureInstitution());
+//		stateManager.add(new NatureInstitutionMultiLLM());
 //		stateManager.add(new MapUpdater());
 		stateManager.add(new GridOfCharts());
 	}

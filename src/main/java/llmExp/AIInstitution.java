@@ -62,6 +62,7 @@ public class AIInstitution extends AbstractInstitution {
 		GatewayServer.turnLoggingOff();
 		GatewayServer server = new GatewayServer();
 		server.start();
+		System.out.println("Server established...");
 		agentEntry = (AgentEntry) server.getPythonServerEntryPoint(new Class[] { AgentEntry.class });
 
 		initialMeatSupply = modelRunner.getState(DataCenter.class).getInitSupplyMap().get("Meat");
@@ -127,13 +128,13 @@ public class AIInstitution extends AbstractInstitution {
 				}
 
 				//======>For individual institution
-//				int response = agentEntry.agentRun(actionHistory, averageErrors);
+				int response = agentEntry.agentRun(actionHistory, averageErrors);
 				//----------------------------
 				
 				//======>For role-playing
-				String meatDemand = averageEveryFive(demandCollector.get("Meat"),initialMeatSupply);
-				String meatSupply = averageEveryFive(supplyCollector.get("Meat"), initialMeatSupply);
-				int response = agentEntry.agentRun(actionHistory, meatDemand, meatSupply);
+//				String meatDemand = averageEveryFive(demandCollector.get("Meat"),initialMeatSupply);
+//				String meatSupply = averageEveryFive(supplyCollector.get("Meat"), initialMeatSupply);
+//				int response = agentEntry.agentRun(actionHistory, meatDemand, meatSupply);
 				//-----------------------------
 				
 				double incrementalIntervention = ((double) response) / 10.0;

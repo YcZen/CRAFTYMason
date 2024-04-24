@@ -42,6 +42,8 @@ public class ModelRunnerInterop extends ModelRunner {
 		loadStateManager();
 	}
 
+	
+	// This is for generating data without any policy intervention
 	public static void main(String[] args) {
 //		doLoop(ModelRunnerInterop.class, args);
 		

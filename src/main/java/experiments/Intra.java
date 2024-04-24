@@ -18,16 +18,17 @@ import updaters.SupplyUpdater;
 public class Intra extends ModelRunner {
 
 ////////////Experimental parameters///////////////////
-	private double meatGoal = 1;
-	private double cropGoal = 4;
-	private double divGoal = 2;
-	private double limit = 0.66;
-	private int policyLag = 5;
-	private int meatLag = 5;
-	private int cropLag = 5;
-	private double paInertia = 0.1;
+	protected double meatGoal = 1;
+	protected double cropGoal = 4;
+	protected double divGoal = 2;
+	protected double limit = 0.66;
+	protected int policyLag = 5;
+	protected int meatLag = 5;
+	protected int cropLag = 5;
+	protected double paInertia = 0.1;
 	protected double threshold = 0.3;
 	protected int endYearProtc = 0;
+	
 
 	public Intra(long seed) {
 		super(seed);
@@ -51,7 +52,7 @@ public class Intra extends ModelRunner {
 		stateManager.add(new SupplyUpdater());
 
 		stateManager.add(new AgriInstitution());
-		//stateManager.add(new NatureInstitution());
+		stateManager.add(new NatureInstitution());
 		stateManager.add(new MapUpdater());
 		stateManager.add(new GridOfCharts());
 	}
@@ -376,5 +377,7 @@ public class Intra extends ModelRunner {
 	public void setEndYearProtc(int endYearProtc) {
 		this.endYearProtc = endYearProtc;
 	}
+	
+
 
 }

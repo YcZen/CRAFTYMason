@@ -20,7 +20,7 @@ public class CapitalUpdater extends AbstractUpdater {
 	@Override
 	public void setup(AbstractModelRunner modelRunner) {
 		this.modelRunner = modelRunner;
-
+		//System.out.println(1/0);
 	}
 
 	@Override

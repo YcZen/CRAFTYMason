@@ -15,6 +15,7 @@ public class SupplyUpdater extends AbstractUpdater {
 	public void step(SimState arg0) {
 		modelRunner.getState(DataCenter.class).updateSupply();
 		// System.out.println("Supply Updater step");
+
 	}
 
 	@Override

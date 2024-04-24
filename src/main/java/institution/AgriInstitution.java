@@ -12,18 +12,17 @@ import sim.engine.SimState;
 public class AgriInstitution extends AbstractInstitution {
 
 	private static final long serialVersionUID = 1L;
-	InformCollector demandCollector;
-	InformCollector supplyCollector;
-	FunctionBlock functionBlock;
-	private FunctionBlock fuzzyTax;
-	private FunctionBlock fuzzySubsidy;
-	private FunctionBlock fuzzyECO;
-	private ArrayList<Double> averageGapList = new ArrayList<>();
-	private ArrayList<Double> incrementalList = new ArrayList<>();
+	protected InformCollector demandCollector;
+	protected InformCollector supplyCollector;
+	protected FunctionBlock functionBlock;
+	protected FunctionBlock fuzzyTax;
+	protected FunctionBlock fuzzySubsidy;
+	protected FunctionBlock fuzzyECO;
+	protected ArrayList<Double> averageGapList = new ArrayList<>();
+	protected ArrayList<Double> incrementalList = new ArrayList<>();
 
 	@Override
 	public void initialize() {
-
 		fuzzyPrepare();
 		Policy policy = new Policy.Builder().policyName("decrease meat").type(PolicyType.ECO)
 				// .type(PolicyType.ECO)

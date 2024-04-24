@@ -128,13 +128,17 @@ public class InstitutionInterop extends AbstractInstitution {
 				}
 
 				//======>For individual institution
-//				int response = agentEntry.agentRun(actionHistory, averageErrors);
+				int response = agentEntry.agentRun(actionHistory, averageErrors);
 				
 				//======>For role-playing
 //				String meatDemand = averageEveryFive(demandCollector.get("Meat"),initialMeatSupply);
 //				String meatSupply = averageEveryFive(supplyCollector.get("Meat"), initialMeatSupply);
 //				int response = agentEntry.agentRun(actionHistory, meatDemand, meatSupply);
 				
+			
+				//=======>For benchmark non-llm agents, such as ilder doing nothing. The actions are
+				// derived directly from ModelRunnerInterop, which can assigns a list of zeros to actions
+				// in its main function.
 				if (index >= 0 && index < actions.size()) {
 				    response = actions.get(index);
 				    index += 1;

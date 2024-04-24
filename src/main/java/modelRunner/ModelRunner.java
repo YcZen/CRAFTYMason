@@ -63,7 +63,7 @@ public class ModelRunner extends AbstractModelRunner {
 	//	stateManager.add(dataCenter.getCellSet());
 		stateManager.add(new SupplyUpdater());
 
-		stateManager.add(new AgriInstitution());
+	//	stateManager.add(new AgriInstitution());
 		stateManager.add(new MapUpdater());
 		stateManager.add(new GridOfCharts());
 	}
