@@ -17,7 +17,7 @@ public class SupplyInitializer extends AbstractUpdater {
 			modelRunner.getState(DataCenter.class).getInitSupplyMap().put(service, initMap.get(service));
 		});
 
-		// System.out.println("Supply Updater step");
+	//	System.out.println("Supply Updater step");
 	}
 
 	@Override

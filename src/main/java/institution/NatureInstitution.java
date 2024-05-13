@@ -52,7 +52,7 @@ public class NatureInstitution extends AbstractInstitution {
 		policyAdaptation();
 	//	budgetUpdate();
 //		resourceAllocation();
-		// implementPolicy(); // this method is exectued in utilityUpdater
+		// implementPolicy(); // this method is exectued in InfluencedutilityUpdater
 		updatePolicyHistory();
 	}
 

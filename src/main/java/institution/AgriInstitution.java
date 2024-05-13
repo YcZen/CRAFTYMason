@@ -224,7 +224,15 @@ public class AgriInstitution extends AbstractInstitution {
 
 	@Override
 	public void step(SimState arg0) {
-		// System.out.println("Institution step");
+		/*
+		 * Note: the reason why I put initialize() here instead of in setup()
+		 *  is because setting policy goals needs the initial global production,
+		 *  but the global production is calculated for the first time 
+		 *  only when everything is set up, particularly, the managerSet. So, I put 
+		 *  initialize(), after everthing is settled. 
+		 *  This of course can be implemented in a more intuitive way in the future. 
+		 *   
+		 */
 		if (modelRunner.schedule.getTime() == 0) {
 			initialize();
 		}
