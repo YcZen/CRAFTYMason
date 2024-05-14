@@ -60,7 +60,7 @@ public class AgricultureInsitutionMultiLLM extends AgriInstitution {
 //		policy = new Policy.Builder().policyName("increase crop").type(PolicyType.SUBSIDY)
 //				 .type(PolicyType.ECO)
 //				.goal(((MLLRunner) modelRunner).getCropGoal()
-//						* modelRunner.getState(DataCenter.class).getInitSupplyMap().get("Crops"))
+//						* modelRunner.getState(DataCenter.class).getGlobalProductionMap().get("Crops"))
 //				.initialGuess(1000000.).inertia(0.2).policyLag(((MLLRunner) modelRunner).getCropLag())
 //				.targetService("Crops").build();
 	//	this.register(policy);

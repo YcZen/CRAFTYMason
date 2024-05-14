@@ -1,5 +1,8 @@
 package multiLevelLLMExp;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,10 +28,11 @@ public class NatureInstitutionMultiLLM extends NatureInstitution {
 	private double paRatio = 0;
 	double budgetGain = 0;
 	double budgetSurplus = 0;
+	ArrayList<Integer> timeList = new ArrayList<Integer>();
 	ArrayList<Double> budgetSurplusList = new ArrayList<Double>();
-	ArrayList<Integer> time = new ArrayList<Integer>();
 	ArrayList<Double> paGoalList = new ArrayList<Double>();
 	ArrayList<Double> paRaioList = new ArrayList<Double>();
+
 	
 	@Override
 	public void setup(AbstractModelRunner modelRunner) {
@@ -44,7 +48,6 @@ public class NatureInstitutionMultiLLM extends NatureInstitution {
 	
 	@Override
 	public void step(SimState arg0) {
-		// System.out.println("Institution step");
 		if (modelRunner.schedule.getTime() == 0) {
 	//		initialize();
 		}
@@ -57,6 +60,7 @@ public class NatureInstitutionMultiLLM extends NatureInstitution {
 //		resourceAllocation();  //not needed in here.
 		// implementPolicy(); // this method is exectued in InfluencedutilityUpdater
 		updatePolicyHistory();
+		updateRecordedData();
 	}
 	
 	@Override
@@ -272,5 +276,32 @@ public class NatureInstitutionMultiLLM extends NatureInstitution {
 	
 	public void setBudgetGain(double budgetGain) {
 		this.budgetGain = budgetGain;
+	}
+	
+	public void updateRecordedData() {
+		timeList.add((int) modelRunner.schedule.getSteps());
+		budgetSurplusList.add(budgetSurplus);
+		paGoalList.add(1 - ((MLLRunner)modelRunner).getUnprotectionLimit());
+		paRaioList.add(paRatio);
+		
+		int listSize = timeList.size();
+        // Specify the file name
+        String csvFile = "C:\\Publications\\LLM_mixed\\Nature_conservation.csv";
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(csvFile))) {
+            // Write the header
+            writer.write("Time,Policy goal of protected area ratio,Actual protected area ratio,Budget surplus"); // do not add needless blank in the string
+            writer.newLine();
+
+            // Write data from both lists to the file
+            for (int i = 0; i < listSize; i++) {
+                writer.write(timeList.get(i) + "," + paGoalList.get(i) + "," + paRaioList.get(i) + "," + budgetSurplusList.get(i));
+                writer.newLine();
+            }
+
+            System.out.println("Data successfully written to " + csvFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 	}
 }

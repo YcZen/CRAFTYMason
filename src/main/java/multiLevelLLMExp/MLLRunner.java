@@ -68,11 +68,12 @@ public class MLLRunner extends Intra{
 		stateManager.add(new InitialProductionCalculator()); //This only calculate the initial production
 		stateManager.add(new SupplyUpdater());
 
+		stateManager.add(new GatewayConnector());
 		
 	    stateManager.add(new AgricultureInsitutionMultiLLM());
 		stateManager.add(new NatureInstitutionMultiLLM());
 		
-		stateManager.add(new GatewayConnector());
+
 		stateManager.add(new MapUpdater());
 		stateManager.add(new GridOfCharts());
 	}
