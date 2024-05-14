@@ -143,7 +143,7 @@ public class AIInstitution extends AbstractInstitution {
 
 				policy.setInterventionModifier(incrementalIntervention + interventionModifier);
 
-				policy.updateIntervention();
+				policy.updateInterventionNeeded();
 
 				String currentAction = String.format("%+d", response);
 				actionHistory = actionHistory + ", " + currentAction;

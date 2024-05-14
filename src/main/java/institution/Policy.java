@@ -3,6 +3,8 @@ package institution;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sourceforge.jFuzzyLogic.fcl.FclParser.declaration_return;
+
 public class Policy {
 
 	private String policyName = "Default Policy";
@@ -14,9 +16,10 @@ public class Policy {
 	double interventionModifier = 0;
 	double evluation;
 	int policyLag = 5;
-	double intervention = 0;
+	double intervention = 0;       //Actual intervention, constrained by many factors
 	boolean startChanging = false;
 	private List<Double> policyHistory = new ArrayList<Double>();
+	private double interventionNeeded = 0;  // Intervention needed, not constrained by budgets.
 
 	private Policy(Builder builder) {
 		this.policyName = builder.policyName;
@@ -116,8 +119,8 @@ public class Policy {
 		return goal;
 	}
 
-	public void updateIntervention() {
-		intervention = interventionModifier * initialguess;
+	public void updateInterventionNeeded() {
+		interventionNeeded = interventionModifier * initialguess;
 	}
 
 	public double getIntervention() {
@@ -170,5 +173,14 @@ public class Policy {
 		// TODO Auto-generated method stub
 		return initialguess;
 	}
+
+	public double getInterventionNeeded() {
+		return interventionNeeded;
+	}
+
+	public void setInterventionNeeded(double interventionNeeded) {
+		this.interventionNeeded = interventionNeeded;
+	}
+	
 
 }

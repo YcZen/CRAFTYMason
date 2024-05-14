@@ -75,9 +75,30 @@ public class MLLRunner extends Intra{
 		
 
 		stateManager.add(new MapUpdater());
-		stateManager.add(new GridOfCharts());
+	//	stateManager.add(new GridOfCharts());
 	}
 	
 	
+	public double getZIntervention() {
+		var x = getState(AgricultureInsitutionMultiLLM.class).getPolicyMap().get("decrease meat");
+		return x==null ? 0.0:x.getIntervention();
+	}
+	
+	public double getZTotalBudget() {
+		return getState(AgricultureInsitutionMultiLLM.class).getTotalBugdet();
+	}
+	
+	public double getZBudgetSurplus() {
+		return getState(AgricultureInsitutionMultiLLM.class).getBudgetSurplus();
+	}
+	
+	public double getZbudgetGain() {
+		return getState(AgricultureInsitutionMultiLLM.class).budgetGain;
+	}
 
+	public double getZNeededIntervention() {
+		var x = getState(AgricultureInsitutionMultiLLM.class).getPolicyMap().get("decrease meat");
+		return x==null ? 0.0:x.getInterventionNeeded();
+	}
+	
 }

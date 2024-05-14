@@ -92,7 +92,7 @@ public class GatewayConnector extends AbstractUpdater{
 		if (modelRunner.schedule.getSteps()==0){
 			parseIntervention();  
 			updateInstitutionGoals();    
-			updateInstitutionBudgets();
+		//	updateInstitutionBudgets();
 		}
 		
 		try {
@@ -107,12 +107,13 @@ public class GatewayConnector extends AbstractUpdater{
 			//	highInstitutionOutput = gateEntry.runAgents(info);
 				parseIntervention();
 				updateInstitutionGoals();
-				updateInstitutionBudgets();
+
 			}
 			
 			/*
 			 *  III. Record the data. If III is executed then new data is recorded.
 			 */
+			updateInstitutionBudgets();
 			updateRecordedData();
 		}catch(Throwable ex){
 	        System.err.println("Uncaught exception - " + ex.getMessage());

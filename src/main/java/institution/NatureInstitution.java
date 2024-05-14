@@ -146,7 +146,7 @@ public class NatureInstitution extends AbstractInstitution {
 				double bound = Math.signum(fuzzyResult) * policy.getInertia();
 				double incrementalIntervention = (Math.abs(bound) < Math.abs(fuzzyResult)) ? bound : fuzzyResult;
 				policy.setInterventionModifier(incrementalIntervention + interventionModifier);
-				policy.updateIntervention();
+				policy.updateInterventionNeeded();
 //				System.out.println("average gap: " + policy.getEvluation() + "; intervention: "
 //						+ functionBlock.getVariable("intervention").getValue());
 			}
@@ -162,21 +162,21 @@ public class NatureInstitution extends AbstractInstitution {
 		 * cross-subsidization)
 		 */
 		// totalBugdet = 0;
-		policyMap.values().forEach(policy -> {
-			if ((policy.getType() == PolicyType.ECO || policy.getType() == PolicyType.TAX)
-					&& !policy.getHistory().isEmpty()) {
-				if (policy.getLatestHistory() < 0) { // this is to ensure the economic policy is taxing the farmers
-					totalBugdet += Math.abs(policy.getLatestHistory());
-				}
-			}
-		});
-
-		String[] agriProductionList = { "Diversity" };
-		double proportion = 0.;
-		for (String production : agriProductionList) {
-			totalBugdet += (proportion
-					* modelRunner.getState(DataCenter.class).getGlobalProductionMap().get(production));
-		}
+//		policyMap.values().forEach(policy -> {
+//			if ((policy.getType() == PolicyType.ECO || policy.getType() == PolicyType.TAX)
+//					&& !policy.getHistory().isEmpty()) {
+//				if (policy.getLatestHistory() < 0) { // this is to ensure the economic policy is taxing the farmers
+//					totalBugdet += Math.abs(policy.getLatestHistory());
+//				}
+//			}
+//		});
+//
+//		String[] agriProductionList = { "Diversity" };
+//		double proportion = 0.;
+//		for (String production : agriProductionList) {
+//			totalBugdet += (proportion
+//					* modelRunner.getState(DataCenter.class).getGlobalProductionMap().get(production));
+//		}
 
 	}
 
@@ -186,15 +186,16 @@ public class NatureInstitution extends AbstractInstitution {
 		 * Every year the resources should be reallocated. Should consider priority
 		 * later.
 		 */
-		policyMap.values().forEach(policy -> {
-			if (policy.getType() == PolicyType.SUBSIDY
-					|| (policy.getType() == PolicyType.ECO && policy.getIntervention() > 0)) {
-				double intervention = policy.getIntervention();
-				intervention = (intervention < totalBugdet) ? intervention : totalBugdet;
-				policy.setIntervention(intervention);
-				totalBugdet += -intervention;
-			}
-		});
+//		policyMap.values().forEach(policy -> {
+//			if (policy.getType() == PolicyType.SUBSIDY
+//					|| (policy.getType() == PolicyType.ECO && policy.getIntervention() > 0)) {
+//				double interventionNeeded = policy.getInterventionNeeded();
+//				double actualIntervention = (interventionNeeded < totalBugdet) ? interventionNeeded : totalBugdet;
+//				policy.setIntervention(actualIntervention);	
+//				//policy.setInterventionModifier(intervention/policy.getInitialGuess()); //set the modifier to the actual value
+//				totalBugdet += -actualIntervention;
+//			}
+//		});
 
 	}
 

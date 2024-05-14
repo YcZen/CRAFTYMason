@@ -148,7 +148,7 @@ public class NatureInstitutionMultiLLM extends NatureInstitution {
 				double bound = Math.signum(fuzzyResult) * policy.getInertia();
 				double incrementalIntervention = (Math.abs(bound) < Math.abs(fuzzyResult)) ? bound : fuzzyResult;
 				policy.setInterventionModifier(incrementalIntervention + interventionModifier);
-				policy.updateIntervention();
+				policy.updateInterventionNeeded();
 //				System.out.println("average gap: " + policy.getEvluation() + "; intervention: "
 //						+ functionBlock.getVariable("intervention").getValue());
 			}
