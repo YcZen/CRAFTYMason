@@ -46,7 +46,7 @@ public class NatureInstitutionMultiLLM extends NatureInstitution {
 	public void step(SimState arg0) {
 		// System.out.println("Institution step");
 		if (modelRunner.schedule.getTime() == 0) {
-			initialize();
+	//		initialize();
 		}
 
 		collectInformation();
